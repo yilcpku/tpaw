@@ -85,13 +85,16 @@ _kernel(uint32_t num_runs,
         const MonthlyAndAnnual<StocksAndBondsFLOAT>
             *expected_returns_by_run_by_mfn_simulated,
         FLOAT *stock_allocation_total_portfolio_expected_run_by_mfn,
-        Cuda_Processed_TPAW_Run_x_MFNSimulated_x_MFN::Entry *result) {
+        Cuda_Processed_TPAW_Run_x_MFNSimulated_x_MFN::Entry *result,
+        const uint32_t *planning_end_by_mfn_simulated = nullptr) {
 
   const uint32_t index{blockIdx.x * blockDim.x + threadIdx.x};
   const uint32_t run_index{index / num_months_to_simulate};
   if (run_index >= num_runs)
     return;
   const uint32_t month_index{index % num_months_to_simulate};
+  const uint32_t planning_end = planning_end_by_mfn_simulated
+      ? planning_end_by_mfn_simulated[month_index] : num_months;
 
   //   const bool debug = run_index == 0 && month_index == 0;
 
@@ -133,7 +136,7 @@ _kernel(uint32_t num_runs,
 
   // uint32_t cannot be used when counting down if the test condition is
   // >=0 , because 0 will wrap around instead of decrementing.
-  auto num_months_int32 = static_cast<int32_t>(num_months);
+  auto num_months_int32 = static_cast<int32_t>(planning_end);
   auto month_index_int32 = static_cast<int32_t>(month_index);
   for (int32_t ii = num_months_int32 - 1; ii >= month_index_int32; ii--) {
 
@@ -188,7 +191,7 @@ _kernel(uint32_t num_runs,
                                                legacy_stock_allocation,
                                                expected_returns.monthly.bonds);
 
-  const uint32_t num_months_left = num_months - month_index - 1;
+  const uint32_t num_months_left = planning_end - month_index - 1;
   const FLOAT legacy_npv_denominator =
       FLOAT_POWF(FLOAT_L(1.0) + r_of_legacy_portfolio,
                  static_cast<FLOAT>(num_months_left + 1));
@@ -254,7 +257,17 @@ cuda_process_tpaw_run_x_mfn_simulated_x_mfn(
     const thrust::device_vector<MonthlyAndAnnual<StocksAndBondsFLOAT>>
         &expected_returns_by_mfn_simulated_for_expected_run,
     const thrust::device_vector<MonthlyAndAnnual<StocksAndBondsFLOAT>>
-        &expected_returns_by_run_by_mfn_simulated) {
+        &expected_returns_by_run_by_mfn_simulated,
+    const std::vector<uint32_t> &planning_end_by_mfn_simulated) {
+
+  if (!planning_end_by_mfn_simulated.empty()) {
+    if (planning_end_by_mfn_simulated.size() != num_months_to_simulate)
+      throw std::runtime_error("research horizon length");
+    for (uint32_t m = 0; m < num_months_to_simulate; ++m)
+      if (planning_end_by_mfn_simulated[m] <= m || planning_end_by_mfn_simulated[m] > num_months)
+        throw std::runtime_error("research horizon bounds");
+  }
+  const thrust::device_vector<uint32_t> planning_end_gpu(planning_end_by_mfn_simulated);
 
   const thrust::device_vector<_PlanParamsByMFN> plan_params_mfn_optimized_gpu =
       _get_plan_params_mfn_optimized_gpu(income_by_mfn,
@@ -286,7 +299,8 @@ cuda_process_tpaw_run_x_mfn_simulated_x_mfn(
         legacy,
         expected_returns_by_run_by_mfn_simulated.data().get(),
         stock_allocation_total_portfolio_expected_run_by_mfn.data().get(),
-        result.data().get());
+        result.data().get(),
+        planning_end_by_mfn_simulated.empty() ? nullptr : planning_end_gpu.data().get());
     gpuErrchk(cudaPeekAtLastError());
     gpuErrchk(cudaDeviceSynchronize());
     return std::make_pair(
