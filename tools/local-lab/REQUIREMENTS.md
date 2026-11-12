@@ -50,7 +50,7 @@ paths, broad ledger integrations and observed UI results.
   candidate date. Two imported scenarios x100 paths x three deadlines passed
   2,241,000 paired money/allocation checks. Old native snapshots stay immutable;
   fixed-date US-real/circular-sampler and nominal-goal differences are explicit.
-- Current Python model/import/privacy/audit suite:66 tests. Research helpers:23
+- Current Python model/import/auth/privacy/audit suite:75 tests. Research helpers:23
   tests. Windows directory-link destination tests:3 tests. Current-source native
   CUDA suite:42 correctness cases/490 assertions,19 benchmarks skipped. Astryx
   TypeScript and production build pass; Vite reports a nonfatal large-chunk warning.
@@ -66,6 +66,18 @@ paths, broad ledger integrations and observed UI results.
 - Private archive verifies its original1257 manifest entries,843 pinned sources,
   and zero tracked/staged private files. Generic source contains no personal
   financial inputs, result files, DLLs or market-provider caches.
+
+## Optional authenticated hosting
+
+The owner can explicitly authorize a private server copy of the archive and new
+server-side inputs/results. This is separate from the default local-only mode;
+financial files and credentials still never enter Git or the public static root.
+The hosted build supports a subpath and login gate, an obligatory initial password
+change, secure sessions, same-origin writes, logout and password/session revocation.
+Nine authentication/hosted-boundary tests supplement the66 model tests. Python3.12
+server checks pass with the Windows-native-only test skipped. Desktop builds retain
+the original local API and native bridge. Typical Linux hosting keeps native
+snapshots readable but does not execute the pinned Windows/CUDA control.
 
 ## Interpretation and coverage limits
 

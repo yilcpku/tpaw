@@ -57,6 +57,42 @@ The immutable archived reference remains a separate panel. Changing parameters
 does not overwrite either result. Each run saves input, sampled-path and binary
 hashes locally; the UI marks results stale when its inputs change.
 
+## Authenticated server deployment
+
+An explicitly authorized single-owner server deployment is separate from the
+loopback-only desktop mode. Personal files remain outside Git and outside the
+static directory; transferring an existing archive requires the owner's explicit
+authorization. `serve_hosted.py` uses salted scrypt password hashes and in-memory
+8-hour sessions, secure/HttpOnly/SameSite cookies, exact-origin JSON writes,
+mandatory initial password change and session revocation after a password change.
+There is no registration or public financial-data API. All private records are
+blocked until the initial password has changed. Static assets contain no account
+or financial records. Logs omit requests and financial values.
+
+Build with `VITE_TPAW_HOSTED=1`, `TPAW_BASE_PATH=/tpaw/` and
+`TPAW_BUILD_DIR=dist-hosted`, then run `npm run build`. Keep the normal default
+build for the local CUDA-enabled app. Initialize credentials interactively in an
+ignored/non-Git private directory using `AuthStore.create` with `getpass` input;
+never place passwords in source, command-line arguments or public deployment files.
+
+Run the hosted app behind an HTTPS reverse proxy, binding only to loopback:
+
+```text
+python serve_hosted.py --data-dir <private runtime> --static-dir <hosted dist>   --auth-file <private account.json> --origin https://planner.example.com   --path-prefix /tpaw/ --port 8766 --max-runs 100
+```
+
+The proxy must strip `/tpaw/` (trailing-slash `proxy_pass`), forward the public
+`Host` unchanged, preserve cookies and pass original `Origin`/fetch headers. Do
+not cache authenticated API responses. Scope changes to that route; existing
+sites and TLS settings remain untouched. Use a dedicated service account and
+restrict writable paths to the runtime and credential directories. The static
+root must be disjoint from private data and credentials, checked at startup.
+
+Only the portable Python model runs on a typical Linux CPU server. Preserved
+native snapshots remain available; the pinned Windows/CUDA rerun stays in the
+local app. The hosted response advertises its configured path-count cap. Existing
+source/financial artifacts are copied with hashes, not regenerated or made public.
+
 ## Model boundaries
 
 - `policy.py` ports the pinned constant-expectation TPAW Merton/NPV/spending
