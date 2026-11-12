@@ -35,7 +35,7 @@ paths, broad ledger integrations and observed UI results.
 - Hash-verified archived native reference panel plus explicit historical plan
   imports, dated net contributions/bonuses, nominal/real phase goals, budget
   replacement, retirement reserve partition, strict equal-sleeve draws.
--65 mechanism/import/audit tests and desktop/mobile editor/risk-panel checks.
+-66 mechanism/import/audit tests and desktop/mobile editor/risk-panel checks.
 
 ## Completion evidence
 
@@ -50,7 +50,7 @@ paths, broad ledger integrations and observed UI results.
   candidate date. Two imported scenarios x100 paths x three deadlines passed
   2,241,000 paired money/allocation checks. Old native snapshots stay immutable;
   fixed-date US-real/circular-sampler and nominal-goal differences are explicit.
-- Current Python model/import/privacy/audit suite:65 tests. Research helpers:23
+- Current Python model/import/privacy/audit suite:66 tests. Research helpers:23
   tests. Windows directory-link destination tests:3 tests. Current-source native
   CUDA suite:42 correctness cases/490 assertions,19 benchmarks skipped. Astryx
   TypeScript and production build pass; Vite reports a nonfatal large-chunk warning.

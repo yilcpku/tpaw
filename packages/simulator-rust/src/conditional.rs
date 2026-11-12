@@ -15,7 +15,7 @@ fn run(a:Args)->Result<(),Box<dyn std::error::Error>>{
  if !a.threshold.is_finite()||a.threshold<0.0{return Err("threshold".into())}
  let prefix=a.output_prefix.to_str().filter(|x|x.is_ascii()).ok_or("ASCII output")?;
  let paths=PathBuf::from(format!("{prefix}-paths.csv"));let decisions=PathBuf::from(format!("{prefix}-decisions.csv"));
- if paths.exists()||decisions.exists(){return Err("existing output".into())}
+ if paths.symlink_metadata().is_ok()||decisions.symlink_metadata().is_ok(){return Err("existing output or link".into())}
  let parent=a.output_prefix.parent().ok_or("directory")?.canonicalize()?;
  if parent.ancestors().any(|p|p.join(".git").exists()){return Err("private directory".into())}
  let files:Vec<PathBuf>=serde_json::from_reader(File::open(a.requests)?)?;
