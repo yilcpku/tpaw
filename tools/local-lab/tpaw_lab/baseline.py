@@ -2,7 +2,7 @@
 import hashlib
 import json
 
-COMPARISON_FIELDS=("initial_assets","current_age","evaluation_month","candidates","notice_months","threshold_annual",
+COMPARISON_FIELDS=("retirement_plans","retirement_withdrawal","real_cashflows_only","initial_assets","current_age","evaluation_month","candidates","notice_months","threshold_annual",
     "annual_budget","reserve","reserve_basis","reserve_funding","cash_multiple","defensive","term_years","cashflow_rows",
     "planning_cpi","savings_mode","savings_coverage_end","risk_tolerance","policy_rra","policy_variance_annual",
     "time_preference","additional_spending_tilt","stock_return","stock_volatility","planning_defensive_return",

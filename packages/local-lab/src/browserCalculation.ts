@@ -23,6 +23,6 @@ export async function calculate<T>(scenario:{dataset:string},progress:(value:num
       else {pending=undefined;if(m.kind==='done')resolve(m.result);else{worker?.terminate();worker=undefined;reject(new Error(m.message))}}
     }
     worker!.onerror=()=>{pending=undefined;worker?.terminate();worker=undefined;reject(new Error('浏览器计算引擎无法启动，请刷新页面后重试。'))}
-    worker!.postMessage({runtime:new URL(import.meta.env.BASE_URL+'runtime/',location.origin).href,payload:{scenario,inputs:data}})
+    worker!.postMessage({runtime:new URL(import.meta.env.BASE_URL+'runtime/',location.origin).href,payload:{scenario,inputs:data,model_version:'retirement-plans-real-cny-v1'}})
   })
 }

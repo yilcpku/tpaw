@@ -7,7 +7,7 @@ import shutil
 import zipfile
 
 VERSION='314.0.7'
-MODULES=('__init__','browser','market','longevity','simulation','comparison','policy','defensive','yields','cashflows','baseline')
+MODULES=('__init__','retirement','browser','market','longevity','simulation','comparison','policy','defensive','yields','cashflows','baseline')
 
 def package(destination):
     root=Path(__file__).resolve().parent

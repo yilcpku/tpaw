@@ -231,3 +231,11 @@ and release evidence is recorded in `REQUIREMENTS.md`.
 
 Required Notice: Copyright (c) 2020-2026 Benjamin Mathew and Jacob Mathew.
 The parent project's PolyForm Noncommercial 1.0.0 license applies.
+
+## Multi-plan browser model update
+
+The current browser model supersedes candidate-date selection and independent
+reserve mechanics. See [retirement rules and monetary units](RETIREMENT-PLANS.md)
+for fixed/window comparisons, monthly triggering, notice clipping, contribution
+expiry, the one-time real-CNY retirement withdrawal, quartiles and decade minima.
+Original archive records and legacy reproduction commands remain preserved.

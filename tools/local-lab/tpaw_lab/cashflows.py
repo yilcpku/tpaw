@@ -81,9 +81,13 @@ def compile_flows(s:dict,months:int,retirement:int)->FlowSchedule:
             if kind=="budget":
                 if m in budget_assigned:raise ValueError("年度预算阶段重叠；每月只能有一个替换预算。")
                 budget_assigned.add(m);flows.budget_real[m]=flows.budget_nominal[m]=0.
-            getattr(flows,target+"_"+basis)[m]+=amount
+            row_amount=amount
+            actual_basis=basis
+            if s.get('real_cashflows_only') and basis=='nominal':
+                actual_basis='real';row_amount=amount/(1+inflation)**(m/12)
+            getattr(flows,target+"_"+actual_basis)[m]+=row_amount
             if kind in ("essential","discretionary") and row.get("include_in_lifestyle",True):
-                getattr(flows,"lifestyle_"+kind+"_"+basis)[m]+=amount
+                getattr(flows,"lifestyle_"+kind+"_"+actual_basis)[m]+=row_amount
     if savings_mode=="dated" and s.get("require_savings_coverage",False) and savings_assigned!=set(range(retirement)):
         raise ValueError("日期净储蓄缺少工作月份；已知零储蓄月份也需明确列出。")
     funding=s.get("reserve_funding","initial")
