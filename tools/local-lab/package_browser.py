@@ -30,4 +30,3 @@ def package(destination):
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--destination',type=Path,required=True)
     package(p.parse_args().destination)
-
