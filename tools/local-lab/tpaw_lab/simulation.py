@@ -8,6 +8,8 @@ from dataclasses import dataclass
 import hashlib
 import math
 import statistics
+from functools import lru_cache
+from .retirement import review_schedule,decade_minima
 from .defensive import DefensiveSleeve, PartitionedAssets
 from .longevity import LifeTable
 from .market import JointHistory, calibrate_equity, contiguous_blocks, finite, month_index
@@ -48,6 +50,8 @@ def weighted_quantile(pairs: list[tuple[float,float]], q: float) -> float:
 
 
 def candidates(s: dict, months: int) -> tuple[int, ...]:
+    if s.get('retirement_rule'):
+        return tuple(dict.fromkeys(exit for _,exit in review_schedule(s,months)))
     evaluation = month_index(s.get("evaluation_month", "2026-11"))
     dates = [month_index(x.strip())-evaluation for x in s["candidates"].split(",")]
     notice = s["notice_months"]
@@ -106,13 +110,29 @@ def prepare(s: dict, history: JointHistory, table: LifeTable):
         if not isinstance(supplied,list) or not supplied:raise ValueError("Invalid imported risk schedule")
         risk=tuple(supplied[m] if m<len(supplied) else supplied[-1] for m in range(planning))
     variance=finite(s.get("policy_variance_annual",vol*vol),"planning stock variance",1e-12)
-    for exit_month in exits:
-        flow=compile_flows(s,planning,exit_month);flows.append(flow)
+    def build(index):
+        exit_month=exits[index]
+        flow=compile_flows(s,planning,exit_month)
         essential=tuple(a+b for a,b in zip(flow.planned("essential"),flow.planned("reserve_transfer")))
-        policies.append(TpawPolicy(PolicyPlan(assets-(reserve if funding=="initial" else 0),exit_month,
+        policy=TpawPolicy(PolicyPlan(assets-(reserve if funding=="initial" else 0),exit_month,
                          flow.planned("income"),essential,flow.planned("discretionary"),risk,ends,
                          mu,bond,variance,s["time_preference"],s.get("additional_spending_tilt",0),
-                         s.get("legacy_target",0),s.get("legacy_rra",4))))
+                         s.get("legacy_target",0),s.get("legacy_rra",4)))
+        return policy,flow
+    if s.get('retirement_rule'):
+        # Build each reached date once across all paths. This lazy cache belongs
+        # only to this simulate call; evicting dates would rebuild long windows
+        # for every path, multiplying preparation cost by the path count.
+        cached=lru_cache(maxsize=None)(build)
+        class View:
+            def __init__(self,part):self.part=part
+            def __getitem__(self,index):return cached(index)[self.part]
+        policies,flows=View(0),View(1)
+        # Validate work-savings coverage through the latest possible retirement.
+        compile_flows(s,planning,exits[-1])
+    else:
+        for index in range(len(exits)):
+            policy,flow=build(index);policies.append(policy);flows.append(flow)
     return age_months, h, indices, exits, policies,flows
 
 
@@ -217,21 +237,30 @@ def run_path(s: dict, history: JointHistory, indices: tuple[int, ...], exits: tu
     cpis = [1.0]
     active, committed, retirement, forced, projection = 0, False, None, False, None
     records, reviews = [], []
+    commitment=None
+    rule=s.get('retirement_rule')
+    schedule=review_schedule(s,len(indices)) if rule else tuple((exit-s['notice_months'],exit) for exit in exits)
+    schedule_by_month={m:(i,exit) for i,(m,exit) in enumerate(schedule)}
+    exit_indices={exit:i for i,exit in enumerate(exits)}
     lag = s.get("cpi_publication_lag_months",1)
     if type(lag) is not int or not 0 <= lag <= 12:
         raise ValueError("CPI lag must lie in 0..12 months")
     for m, index in enumerate(indices):
         cpi, known_cpi = cpis[-1], cpis[max(0,len(cpis)-1-lag)]
         # No realized month-m observation is read until decisions are final.
-        if not committed and m == exits[active]-s["notice_months"]:
-            policy = policies[active]
-            projection=project_notice(s,account,policy,flows[active] if flows else None,m,exits[active],known_cpi,lag)
-            passed = projection >= s["threshold_annual"]
-            reviews.append({"month":m,"candidate":exits[active],"projected_annual_general":projection,"passed":passed})
-            if passed or active == len(exits)-1:
-                committed, retirement, forced = True,exits[active],not passed
+        if not committed and m in schedule_by_month:
+            review_index,exit_month=schedule_by_month[m]
+            active=exit_indices[exit_month]
+            policy=policies[active]
+            projection=project_notice(s,account,policy,flows[active] if flows else None,m,exit_month,known_cpi,lag)
+            passed=projection>=s['threshold_annual']
+            fixed=bool(rule and rule['kind']=='fixed')
+            reviews.append({'month':m,'candidate':exit_month,'projected_annual_general':projection,'passed':passed})
+            if fixed or passed or review_index==len(schedule)-1:
+                committed,retirement,forced=True,exit_month,not passed and not fixed
+                commitment=m
             else:
-                active += 1
+                active=exit_indices[schedule[review_index+1][1]]
         policy = policies[active]
         flow=flows[active] if flows else None
         start = account.total_value
@@ -260,7 +289,7 @@ def run_path(s: dict, history: JointHistory, indices: tuple[int, ...], exits: tu
         if not math.isclose(account.total_value,start+step.income-step.paid-step.reserve_paid-transfer_loss+market_change,abs_tol=.01):
             raise ArithmeticError("Nominal account identity failed")
         record = {"month":m,"sample_index":index,"sample_month":row.month,"cpi_start":cpi,"cpi_known":known_cpi,
-                  "general_real":step.paid_general/cpi,"total_real":step.paid/cpi,"lifestyle_real":step.paid_lifestyle/cpi,
+                  "income_real":step.income/cpi,"general_real":step.paid_general/cpi,"total_real":step.paid/cpi,"lifestyle_real":step.paid_lifestyle/cpi,
                   "lifestyle_budget_real":(flow.budget_real[m]+flow.budget_nominal[m]/cpi) if flow else s["annual_budget"],"essential_real":step.paid_essential/cpi,
                   "reserve_withdrawal_real":step.reserve_paid/cpi,"reserve_funding_short_real":step.funding_short/cpi,
                   "household_total_real":(step.paid+step.reserve_paid)/cpi,
@@ -277,7 +306,7 @@ def run_path(s: dict, history: JointHistory, indices: tuple[int, ...], exits: tu
     if retirement is None:
         raise ArithmeticError("Final retirement cap was not exercised")
     actual = records[retirement]["lifestyle_real"]*12
-    return {"retirement_month":retirement,"commitment_month":retirement-s["notice_months"],"forced_below_threshold":forced,
+    return {"retirement_month":retirement,"commitment_month":commitment,"forced_below_threshold":forced,
             "actual_exit_below_threshold":actual<s["threshold_annual"],"projected_exit_general_annual":projection,
             "actual_exit_general_annual":actual,"reviews":reviews,"records":records}
 
@@ -287,6 +316,8 @@ def simulate(s: dict, history: JointHistory, table: LifeTable, *, retain_paths:b
     paths=[]
     weights=table.weights(age_months,len(indices[0]))
     annual_values=[[] for _ in range(0,len(indices[0]),12)]
+    retired_values=[[] for _ in annual_values]
+    retirements=[];commitments=[];withdrawals=[];withdrawal_shorts=[]
     initial=[];initial_months=[];forced_count=0;rate_clamps=0
     late_start=max(0,960-age_months)
     metrics=[];estates_at_death=[]
@@ -294,7 +325,13 @@ def simulate(s: dict, history: JointHistory, table: LifeTable, *, retain_paths:b
         path=run_path(s,h,draw,exits,policies,flows)
         if retain_paths:paths.append(path)
         for year,m in enumerate(range(0,len(indices[0]),12)):
-            annual_values[year].append(sum(r['lifestyle_real'] for r in path['records'][m:m+12]))
+            value=sum(r['lifestyle_real'] for r in path['records'][m:m+12])
+            annual_values[year].append(value)
+            if m>=path['retirement_month']:retired_values[year].append(value)
+        retirements.append(path['retirement_month']);commitments.append(path['commitment_month'])
+        retirement_record=path['records'][path['retirement_month']]
+        withdrawals.append(retirement_record['essential_real'])
+        withdrawal_shorts.append(retirement_record['unfunded_essential_real'])
         initial.append(sum(r['lifestyle_real'] for r in path['records'][path['retirement_month']:path['retirement_month']+12]))
         initial_months.append(min(12,len(path['records'])-path['retirement_month']))
         forced_count+=int(path['forced_below_threshold'])
@@ -322,8 +359,11 @@ def simulate(s: dict, history: JointHistory, table: LifeTable, *, retain_paths:b
                         "whole_retirement_budget_short_months":sum(r["lifestyle_real"]+1e-8<r["lifestyle_budget_real"]/12 for r in records[path["retirement_month"]:])})
         if progress:progress((run_index+1)/len(indices))
     n=len(indices)
-    profiles=[{'age':(age_months+m)/12,'p5':quantile(values,.05),'p50':quantile(values,.5),'p95':quantile(values,.95),
+    profiles=[{'age':(age_months+m)/12,'p5':quantile(values,.05),'p25':quantile(values,.25),'p50':quantile(values,.5),'p75':quantile(values,.75),'p95':quantile(values,.95),
                'months_summed':min(12,len(indices[0])-m)} for m,values in zip(range(0,len(indices[0]),12),annual_values)]
+    post_profiles=[{'age':(age_months+m)/12,**{key:quantile(values,q) for key,q in [('p5',.05),('p25',.25),('p50',.5),('p75',.75),('p95',.95)]},
+                    'months_summed':min(12,len(indices[0])-m),'retired_path_count':len(values),'total_path_count':n}
+                   for m,values in zip(range(0,len(indices[0]),12),retired_values) if values]
     initial_label="退休后首12个月日常支出中位数" if min(initial_months)==12 else f"退休初段（{min(initial_months)}至{max(initial_months)}个月，100岁截断）支出中位数"
     distribution={"initial_spending_q5_q50_q95":[quantile(initial,q) for q in (.05,.5,.95)],
                   "estate_at_death_before100_q5_q50_q95":[weighted_quantile(estates_at_death,q) for q in (.05,.5,.95)],
@@ -337,7 +377,13 @@ def simulate(s: dict, history: JointHistory, table: LifeTable, *, retain_paths:b
                   "whole_retirement_budget_short_months_q5_q50_q95":[quantile([x['whole_retirement_budget_short_months'] for x in metrics],q) for q in (.05,.5,.95)],
                   "ever_late_budget_short_conditional_alive_late_start":statistics.mean(x['ever_late_budget_short_conditional_alive_late_start'] for x in metrics)}
     sample_hash=hashlib.sha256(repr(indices).encode()).hexdigest()
-    return {"label":s["name"],"profiles":profiles,"path_metrics":metrics,"paths":paths,"distributions":distribution,
+    return {"label":s["name"],"profiles":profiles,"post_retirement_profiles":post_profiles,"decade_minima":decade_minima(post_profiles),
+            "retirement_timing":{"retirement_month_counts":{str(m):retirements.count(m) for m in sorted(set(retirements))},
+                "commitment_month_counts":{str(m):commitments.count(m) for m in sorted(set(commitments))},
+                "forced_fraction":forced_count/n,"initial_spending_median":statistics.median(initial),
+                "initial_spending_months_min_max":[min(initial_months),max(initial_months)],
+                "withdrawal_paid_real_median":statistics.median(withdrawals),
+                "withdrawal_short_path_fraction":sum(v>.01 for v in withdrawal_shorts)/n},"path_metrics":metrics,"paths":paths,"distributions":distribution,
             "summary":[{"name":initial_label,"value":f"¥{statistics.median(initial):,.0f}"+(f"（{min(initial_months)}至{max(initial_months)}个月）" if min(initial_months)<12 else "")},
                        {"name":"80 岁后预算不足月数中位数（存活至100）","value":f"{statistics.median(x['late_budget_short_months_if_alive_to100'] for x in metrics):.0f} 月"},
                        {"name":"死亡时资产中位数（仅100岁前死亡）","value":f"¥{distribution['estate_at_death_before100_q5_q50_q95'][1]:,.0f}"},

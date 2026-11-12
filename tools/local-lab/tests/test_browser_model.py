@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 import unittest
 from dataclasses import asdict
-from tpaw_lab.browser import run_browser
+from tpaw_lab.browser import run_browser,BROWSER_MODEL_VERSION
 from tpaw_lab.simulation import compare_horizons,simulate
 from test_simulation import life
 from test_market import fixture
@@ -37,7 +37,7 @@ class BrowserModelTests(unittest.TestCase):
     def test_browser_bridge_returns_compact_traceable_two_case_report(self):
         oracle=json.loads((Path(__file__).parent/'fixtures/browser-model-reference.json').read_text(encoding='utf-8'))
         s={**oracle['cases'][0]['scenario'],'dataset':'generic'};history=fixture();table=life()
-        payload={'scenario':s,'engine_sha256':'generic-test-hash','inputs':{
+        payload={'model_version':BROWSER_MODEL_VERSION,'scenario':s,'engine_sha256':'generic-test-hash','inputs':{
             'source':{'history':{'rows':[asdict(r) for r in history.rows],'kind':history.kind,'label':history.label,
                 'sources':history.sources,'limitations':history.limitations}},
             'mortality':{'rows':list(table.rows.values()),'source':table.source}}}
@@ -46,3 +46,7 @@ class BrowserModelTests(unittest.TestCase):
         self.assertEqual(result['provenance']['compute_location'],'browser')
         self.assertEqual(result['provenance']['engine_sha256'],'generic-test-hash')
         self.assertEqual(set(result['horizon_comparison']['cases']),{'rolling','fixed90'})
+
+    def test_stale_ui_cannot_silently_run_new_financial_rules(self):
+        with self.assertRaisesRegex(ValueError,'刷新页面'):
+            run_browser(json.dumps({'scenario':{}}))
