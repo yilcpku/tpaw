@@ -17,7 +17,7 @@ def handler(path,token_valid=False,must_change=True,origin='https://unit-test.in
 
 class HostedAccessTests(unittest.TestCase):
     def test_private_reads_are_refused_before_login_or_password_change(self):
-        for path in ('/api/scenarios','/api/baselines/native','/api/diagnostics','/api/data-audit/private'):
+        for path in ('/api/scenarios','/api/baselines/native','/api/diagnostics','/api/data-audit/private','/api/browser-inputs/private'):
             h=handler(path);h.do_GET();self.assertEqual(h.auth_json.call_args.args[0],401)
             h=handler(path,token_valid=True);h.do_GET();self.assertEqual(h.auth_json.call_args.args[0],403)
 
@@ -34,7 +34,8 @@ class HostedAccessTests(unittest.TestCase):
         h.headers['Content-Length']=str(len(payload));h.rfile=io.BytesIO(payload)
         h.do_POST();self.assertEqual(h.auth_json.call_args.args[0],401)
 
-    def test_run_limit_is_enforced_before_parent_simulation(self):
+    def test_hosted_never_runs_server_simulation(self):
         h=handler('/api/run',token_valid=True,must_change=False);h.server.max_runs=200
         payload=json.dumps({'name':'generic test','runs':201}).encode();h.headers['Content-Length']=str(len(payload));h.rfile=io.BytesIO(payload)
-        h.do_POST();self.assertEqual(h.auth_json.call_args.args[0],400)
+        h.do_POST();self.assertEqual(h.auth_json.call_args.args[0],410)
+        self.assertEqual(h.rfile.tell(),0)

@@ -72,7 +72,7 @@ class HostedHandler(Handler):
             for row in features:
                 if row['name']=='本地情景保存与载入':row.update(name='服务器情景保存与载入',state='登录后访问；输入和结果保存在私有服务器目录')
                 if row['name']=='原版 TPAW':row['state']='已迁移的原生快照可查看；Windows/CUDA原生重跑继续使用本机版本'
-            self.json(200,{'engine':'Authenticated private server','features':features,
+            self.json(200,{'engine':'Browser calculation; authenticated private storage','features':features,
                 'datasets':[d for d in self.server.store.list('data') if d['id']!='hk-male-period-2025'],
                 'diagnostics_id':self.server.diagnostics_id,'native_control_available':False,'max_runs':self.server.max_runs});return
         super().do_GET()
@@ -102,22 +102,8 @@ class HostedHandler(Handler):
                 self.auth_json(400,{'error':'登录或密码更新未成功。请检查用户名、当前密码及新密码（8至256个字符），过多尝试后需等待5分钟。'})
             return
         if not self.authorized():return
-        # Read/validate the bound before the parent's parser without consuming it.
         if path=='/api/run':
-            try:
-                length=int(self.headers.get('Content-Length','0'))
-                if not 0<length<=2*1024*1024:raise ValueError('Request size')
-                body=self.rfile.read(length);scenario=json.loads(body)
-                if type(scenario.get('runs')) is not int or not 1<=scenario['runs']<=self.server.max_runs:
-                    raise ValueError('Path count')
-            except (ValueError,TypeError,AttributeError):
-                self.auth_json(400,{'error':f'服务器每次支持1至{self.server.max_runs}条路径。'});return
-            # Parent handler reads the original body from this bounded in-memory view.
-            import io
-            original=self.rfile;self.rfile=io.BytesIO(body)
-            try:super().do_POST()
-            finally:self.rfile=original
-            return
+            self.auth_json(410,{'error':'模拟已改为浏览器计算，请刷新页面。'});return
         super().do_POST()
 
 

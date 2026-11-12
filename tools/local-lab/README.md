@@ -175,6 +175,41 @@ source/financial artifacts are copied with hashes, not regenerated or made publi
 
 ## Verification
 
+### Browser calculation
+
+The web UI runs the same portable Python model in a module Web Worker using
+Pyodide 314.0.7. `npm run build` packages a deterministic, SHA-256-checked archive
+of public model modules and the pinned WASM runtime. All engine assets are served
+from the same origin; financial payloads are never sent to a Python CDN.
+The first visit downloads about 14 MB. Versioned runtime assets can be cached;
+API responses, the engine manifest and HTML are not cached.
+
+Authenticated `GET /api/browser-inputs/<dataset>` supplies the selected joint
+history and mortality table. Browser reports are saved through `POST /api/results`
+and explicitly labeled as client-computed; the storage server does not certify
+their numerical contents. Hosted `POST /api/run` returns 410 to stale clients.
+Login, password changes, archives and private storage keep their existing access
+controls. Logout/unmount terminates the worker and clears the in-memory input
+cache. Cancellation also terminates the worker, including WASM initialization.
+
+The normal UI compares rolling life expectancy only with fixed age 90, reusing
+the same sampled market draws. Legacy CLI multi-horizon and attribution tools
+remain available separately. Compact runs aggregate monthly paths one at a time;
+the policy recurrence is reused for months sharing the same horizon endpoint.
+Frozen generic pre-change outputs test numerical equivalence across cash,
+deposits and government bonds. Nothing in this optimization changes assumptions.
+
+Charts support pointer/touch inspection, drag-to-zoom, reset, and a keyboard age
+slider. Incomplete terminal years retain their actual month count and stay out of
+the full-year line. Numeric controls keep a text draft while typing decimals.
+Hidden CPI lag, rate persistence, cash trigger and risk conventions retain their
+stored values and are disclosed on the methods page. Historical net savings are
+imported dated amounts, not newly estimated BigLaw payroll; they already deduct
+tax and work-period living expenses.
+
+Runtime references: [Pyodide module workers](https://pyodide.org/en/stable/usage/webworker.html)
+and [custom Python packages](https://pyodide.org/en/stable/usage/loading-custom-python-code.html).
+
 ```powershell
 cd tools/local-lab
 python -m unittest discover -s tests -v

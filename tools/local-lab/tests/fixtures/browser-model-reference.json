@@ -1,0 +1,1902 @@
+{
+  "reference_commit": "c2bfb42267641b91e0075ac6931c0992136df166",
+  "description": "Generated generic fixture, not personal inputs or market history",
+  "cases": [
+    {
+      "scenario": {
+        "name": "Generic browser reference",
+        "initial_assets": 120000,
+        "reserve": 15000,
+        "current_age": 78,
+        "evaluation_month": "2026-11",
+        "candidates": "2027-02,2027-08,2028-02",
+        "notice_months": 3,
+        "annual_budget": 6000,
+        "threshold_annual": 6000,
+        "horizon": "rolling",
+        "margin": 5,
+        "stock_return": 4,
+        "stock_volatility": 18,
+        "planning_defensive_return": 0.5,
+        "time_preference": 0,
+        "risk_tolerance": 12,
+        "cash_multiple": 1.5,
+        "term_years": 5,
+        "defensive": "deposit",
+        "runs": 4,
+        "seed": 1,
+        "use_forward_targets": true,
+        "initial_deposit_rate": 0.03,
+        "initial_government_yield": 0.035,
+        "demand_rate": 0.005,
+        "monthly_savings": 1000,
+        "planning_cpi": 0.025,
+        "reserve_cash_rate": 0.01,
+        "cashflow_rows": [
+          {
+            "kind": "essential",
+            "reference": "retirement",
+            "start": 0,
+            "amount": 1500,
+            "basis": "nominal",
+            "duration_months": 3
+          },
+          {
+            "kind": "budget",
+            "reference": "retirement",
+            "start": 12,
+            "amount": 7200,
+            "basis": "real",
+            "duration_months": 1440
+          },
+          {
+            "kind": "reserve_draw",
+            "reference": "retirement",
+            "start": 1,
+            "amount": 2000,
+            "basis": "nominal",
+            "duration_months": 1
+          }
+        ]
+      },
+      "result": {
+        "label": "Generic browser reference",
+        "profiles": [
+          {
+            "age": 78.0,
+            "p5": 11290.312231857348,
+            "p50": 11415.59871941795,
+            "p95": 11489.158946818912,
+            "months_summed": 12
+          },
+          {
+            "age": 79.0,
+            "p5": 9123.917245381497,
+            "p50": 9322.103250423204,
+            "p95": 9397.716278672548,
+            "months_summed": 12
+          },
+          {
+            "age": 80.0,
+            "p5": 9129.471462976317,
+            "p50": 9322.793201567318,
+            "p95": 9396.565217377629,
+            "months_summed": 12
+          },
+          {
+            "age": 81.0,
+            "p5": 9093.610692098195,
+            "p50": 9278.59215379036,
+            "p95": 9352.438308356532,
+            "months_summed": 12
+          },
+          {
+            "age": 82.0,
+            "p5": 9008.039269387864,
+            "p50": 9184.582955710397,
+            "p95": 9259.822584216074,
+            "months_summed": 12
+          },
+          {
+            "age": 83.0,
+            "p5": 7685.936191081087,
+            "p50": 8059.271052773853,
+            "p95": 8215.391851165079,
+            "months_summed": 12
+          },
+          {
+            "age": 84.0,
+            "p5": 6666.8481500613225,
+            "p50": 6992.111301738674,
+            "p95": 7124.627070845102,
+            "months_summed": 12
+          },
+          {
+            "age": 85.0,
+            "p5": 5782.281673924079,
+            "p50": 6065.276039668821,
+            "p95": 6180.483563019285,
+            "months_summed": 12
+          },
+          {
+            "age": 86.0,
+            "p5": 5014.679207207096,
+            "p50": 5262.915643396107,
+            "p95": 5365.32284369368,
+            "months_summed": 12
+          },
+          {
+            "age": 87.0,
+            "p5": 4349.130286228132,
+            "p50": 4566.0647369751905,
+            "p95": 4657.421771200134,
+            "months_summed": 12
+          },
+          {
+            "age": 88.0,
+            "p5": 3753.5584075296265,
+            "p50": 3963.4634748216254,
+            "p95": 4125.531856361241,
+            "months_summed": 12
+          },
+          {
+            "age": 89.0,
+            "p5": 3257.2965891224417,
+            "p50": 3439.8712154193436,
+            "p95": 3579.6845328431446,
+            "months_summed": 12
+          },
+          {
+            "age": 90.0,
+            "p5": 2827.3592866919616,
+            "p50": 2985.9096277712006,
+            "p95": 3108.0875578428618,
+            "months_summed": 12
+          },
+          {
+            "age": 91.0,
+            "p5": 2456.070049369388,
+            "p50": 2593.238278603909,
+            "p95": 2700.046472386252,
+            "months_summed": 12
+          },
+          {
+            "age": 92.0,
+            "p5": 2136.8469839163354,
+            "p50": 2254.784714424818,
+            "p95": 2348.2890783573266,
+            "months_summed": 12
+          },
+          {
+            "age": 93.0,
+            "p5": 1885.9770750083005,
+            "p50": 1957.2904810559667,
+            "p95": 2038.820946247308,
+            "months_summed": 12
+          },
+          {
+            "age": 94.0,
+            "p5": 1631.1007950791384,
+            "p50": 1697.1722388159485,
+            "p95": 1771.777673286465,
+            "months_summed": 12
+          },
+          {
+            "age": 95.0,
+            "p5": 1400.2708828172595,
+            "p50": 1461.3740165784616,
+            "p95": 1528.0436889231783,
+            "months_summed": 12
+          },
+          {
+            "age": 96.0,
+            "p5": 1199.7279679133267,
+            "p50": 1252.350324278027,
+            "p95": 1310.6983481930663,
+            "months_summed": 12
+          },
+          {
+            "age": 97.0,
+            "p5": 1027.8727240279575,
+            "p50": 1072.894255612003,
+            "p95": 1122.918338776255,
+            "months_summed": 12
+          },
+          {
+            "age": 98.0,
+            "p5": 881.1698621037651,
+            "p50": 919.0558252794402,
+            "p95": 961.9393394124978,
+            "months_summed": 12
+          },
+          {
+            "age": 99.0,
+            "p5": 754.8885400758321,
+            "p50": 787.3713411545509,
+            "p95": 824.1326440734385,
+            "months_summed": 12
+          }
+        ],
+        "distributions": {
+          "estate_at_death_before100_q5_q50_q95": [
+            26244.08211729441,
+            47062.56744261012,
+            112434.7652611052
+          ],
+          "assets_if_alive100_q5_q50_q95": [
+            23478.757940310818,
+            26870.228166370463,
+            28569.092472591663
+          ],
+          "late_max_budget_cut_fraction_q5_q50_q95": [
+            0.886892473176904,
+            0.891942934727079,
+            0.8962505567298144
+          ],
+          "late_longest_short_spell_months_q5_q50_q95": [
+            181.8,
+            192.0,
+            192.0
+          ],
+          "sampling_path_fraction_any_cash_floor_short": 1.0,
+          "sampling_path_fraction_any_unfunded_consumption": 0.0,
+          "sampling_path_fraction_any_reserve_short": 0.0,
+          "initial_spending_months_min_max": [
+            12,
+            12
+          ],
+          "whole_retirement_budget_short_months_q5_q50_q95": [
+            189.45,
+            192.0,
+            192.0
+          ],
+          "ever_late_budget_short_conditional_alive_late_start": 0.9417645335842486
+        },
+        "summary": [
+          {
+            "name": "退休后首12个月日常支出中位数",
+            "value": "¥13,736"
+          },
+          {
+            "name": "80 岁后预算不足月数中位数（存活至100）",
+            "value": "192 月"
+          },
+          {
+            "name": "死亡时资产中位数（仅100岁前死亡）",
+            "value": "¥47,063"
+          },
+          {
+            "name": "80岁后最大预算削减幅度中位数",
+            "value": "89.2%"
+          },
+          {
+            "name": "最长连续不足时长中位数（存活至100）",
+            "value": "192 月"
+          },
+          {
+            "name": "被迫在门槛下退休的路径比例",
+            "value": "0.0%"
+          }
+        ],
+        "mortality": {
+          "source": {
+            "kind": "synthetic unit test"
+          },
+          "survival_to100": 0.7189237334319261,
+          "conditioned_alive_at_evaluation_age": true
+        },
+        "provenance": {
+          "history_kind": "synthetic_stress",
+          "history_start": "1990-01",
+          "history_end": "2004-12",
+          "sources": [
+            "synthetic"
+          ],
+          "limitations": [
+            "Not empirical data",
+            "Forward targets replace historical equity moments; no second valuation adjustment. Residual ordering and paired macro/yield rows retained; empirical correlation can change after transformation."
+          ],
+          "sample_index_sha256": "4b0cd758302601c7f0dab9e867811c6eecd33a8a8d01d920d5faee54b934bf33",
+          "sampler": "joint non-circular contiguous 60-month blocks",
+          "defensive_rate_mode": "constant",
+          "defensive_rates_are_product_quotes": false,
+          "cpi_publication_lag_months": 1,
+          "historical_rate_process": "joint observed absolute curve changes; zero floor; explicit pull-to-sampled-level if persistence<1",
+          "rate_persistence": 1,
+          "reserve_funding": "initial",
+          "reserve_basis": "real",
+          "cashflow_planning_cpi": 0.025,
+          "budget_rows_are_extra_expenses": false,
+          "rate_zero_floor_clamps": 0,
+          "policy": "portable double-precision constant-expectation TPAW research port; original native baseline remains separate"
+        },
+        "notes": [
+          "模拟至恰好100岁；超过该年龄的死亡与资产风险没有外推。",
+          "支出图显示逐点分位数；支出削减月数按完整路径计算。",
+          "短历史及其重抽样路径比例不是未来几十年安全概率。前瞻收益与波动为绝对替换目标。",
+          "名义存款合约、提前支取损失与国债价格单独记账；实际消费使用所设CPI公布滞后。"
+        ]
+      }
+    },
+    {
+      "scenario": {
+        "name": "Generic browser reference",
+        "initial_assets": 120000,
+        "reserve": 15000,
+        "current_age": 78,
+        "evaluation_month": "2026-11",
+        "candidates": "2027-02,2027-08,2028-02",
+        "notice_months": 3,
+        "annual_budget": 6000,
+        "threshold_annual": 6000,
+        "horizon": "fixed90",
+        "margin": 5,
+        "stock_return": 4,
+        "stock_volatility": 18,
+        "planning_defensive_return": 0.5,
+        "time_preference": 0,
+        "risk_tolerance": 12,
+        "cash_multiple": 1.5,
+        "term_years": 5,
+        "defensive": "deposit",
+        "runs": 4,
+        "seed": 1,
+        "use_forward_targets": true,
+        "initial_deposit_rate": 0.03,
+        "initial_government_yield": 0.035,
+        "demand_rate": 0.005,
+        "monthly_savings": 1000,
+        "planning_cpi": 0.025,
+        "reserve_cash_rate": 0.01,
+        "cashflow_rows": [
+          {
+            "kind": "essential",
+            "reference": "retirement",
+            "start": 0,
+            "amount": 1500,
+            "basis": "nominal",
+            "duration_months": 3
+          },
+          {
+            "kind": "budget",
+            "reference": "retirement",
+            "start": 12,
+            "amount": 7200,
+            "basis": "real",
+            "duration_months": 1440
+          },
+          {
+            "kind": "reserve_draw",
+            "reference": "retirement",
+            "start": 1,
+            "amount": 2000,
+            "basis": "nominal",
+            "duration_months": 1
+          }
+        ]
+      },
+      "result": {
+        "label": "Generic browser reference",
+        "profiles": [
+          {
+            "age": 78.0,
+            "p5": 11290.312231857348,
+            "p50": 11415.59871941795,
+            "p95": 11489.158946818912,
+            "months_summed": 12
+          },
+          {
+            "age": 79.0,
+            "p5": 9123.917245381497,
+            "p50": 9322.103250423204,
+            "p95": 9397.716278672548,
+            "months_summed": 12
+          },
+          {
+            "age": 80.0,
+            "p5": 9129.471462976317,
+            "p50": 9322.793201567318,
+            "p95": 9396.565217377629,
+            "months_summed": 12
+          },
+          {
+            "age": 81.0,
+            "p5": 9093.610692098195,
+            "p50": 9278.59215379036,
+            "p95": 9352.438308356532,
+            "months_summed": 12
+          },
+          {
+            "age": 82.0,
+            "p5": 9008.039269387864,
+            "p50": 9184.582955710397,
+            "p95": 9259.822584216074,
+            "months_summed": 12
+          },
+          {
+            "age": 83.0,
+            "p5": 8731.257674691451,
+            "p50": 9155.147849659556,
+            "p95": 9335.15871547206,
+            "months_summed": 12
+          },
+          {
+            "age": 84.0,
+            "p5": 8588.413870109167,
+            "p50": 9007.231478582176,
+            "p95": 9181.738687819827,
+            "months_summed": 12
+          },
+          {
+            "age": 85.0,
+            "p5": 8435.13127997331,
+            "p50": 8848.604010791762,
+            "p95": 9021.274414549054,
+            "months_summed": 12
+          },
+          {
+            "age": 86.0,
+            "p5": 8276.180177617147,
+            "p50": 8683.603406465441,
+            "p95": 8856.753346846943,
+            "months_summed": 12
+          },
+          {
+            "age": 87.0,
+            "p5": 8124.157584384761,
+            "p50": 8520.264132861474,
+            "p95": 8691.019105627813,
+            "months_summed": 12
+          },
+          {
+            "age": 88.0,
+            "p5": 7942.903518084013,
+            "p50": 8384.25701120978,
+            "p95": 8713.019722063906,
+            "months_summed": 12
+          },
+          {
+            "age": 89.0,
+            "p5": 7740.811793995043,
+            "p50": 8195.597322765385,
+            "p95": 8501.391733894678,
+            "months_summed": 12
+          },
+          {
+            "age": 90.0,
+            "p5": 637.2529929741249,
+            "p50": 674.5751348566332,
+            "p95": 697.6188473281866,
+            "months_summed": 12
+          },
+          {
+            "age": 91.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          },
+          {
+            "age": 92.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          },
+          {
+            "age": 93.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          },
+          {
+            "age": 94.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          },
+          {
+            "age": 95.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          },
+          {
+            "age": 96.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          },
+          {
+            "age": 97.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          },
+          {
+            "age": 98.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          },
+          {
+            "age": 99.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          }
+        ],
+        "distributions": {
+          "estate_at_death_before100_q5_q50_q95": [
+            16244.513621869264,
+            32888.787333142565,
+            112434.7652611052
+          ],
+          "assets_if_alive100_q5_q50_q95": [
+            18332.056038497987,
+            21506.07801208781,
+            22945.341441223907
+          ],
+          "late_max_budget_cut_fraction_q5_q50_q95": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "late_longest_short_spell_months_q5_q50_q95": [
+            119.0,
+            119.0,
+            119.0
+          ],
+          "sampling_path_fraction_any_cash_floor_short": 1.0,
+          "sampling_path_fraction_any_unfunded_consumption": 0.0,
+          "sampling_path_fraction_any_reserve_short": 0.0,
+          "initial_spending_months_min_max": [
+            12,
+            12
+          ],
+          "whole_retirement_budget_short_months_q5_q50_q95": [
+            119.0,
+            119.0,
+            119.0
+          ],
+          "ever_late_budget_short_conditional_alive_late_start": 0.8596401203969627
+        },
+        "summary": [
+          {
+            "name": "退休后首12个月日常支出中位数",
+            "value": "¥13,736"
+          },
+          {
+            "name": "80 岁后预算不足月数中位数（存活至100）",
+            "value": "119 月"
+          },
+          {
+            "name": "死亡时资产中位数（仅100岁前死亡）",
+            "value": "¥32,889"
+          },
+          {
+            "name": "80岁后最大预算削减幅度中位数",
+            "value": "100.0%"
+          },
+          {
+            "name": "最长连续不足时长中位数（存活至100）",
+            "value": "119 月"
+          },
+          {
+            "name": "被迫在门槛下退休的路径比例",
+            "value": "0.0%"
+          }
+        ],
+        "mortality": {
+          "source": {
+            "kind": "synthetic unit test"
+          },
+          "survival_to100": 0.7189237334319261,
+          "conditioned_alive_at_evaluation_age": true
+        },
+        "provenance": {
+          "history_kind": "synthetic_stress",
+          "history_start": "1990-01",
+          "history_end": "2004-12",
+          "sources": [
+            "synthetic"
+          ],
+          "limitations": [
+            "Not empirical data",
+            "Forward targets replace historical equity moments; no second valuation adjustment. Residual ordering and paired macro/yield rows retained; empirical correlation can change after transformation."
+          ],
+          "sample_index_sha256": "4b0cd758302601c7f0dab9e867811c6eecd33a8a8d01d920d5faee54b934bf33",
+          "sampler": "joint non-circular contiguous 60-month blocks",
+          "defensive_rate_mode": "constant",
+          "defensive_rates_are_product_quotes": false,
+          "cpi_publication_lag_months": 1,
+          "historical_rate_process": "joint observed absolute curve changes; zero floor; explicit pull-to-sampled-level if persistence<1",
+          "rate_persistence": 1,
+          "reserve_funding": "initial",
+          "reserve_basis": "real",
+          "cashflow_planning_cpi": 0.025,
+          "budget_rows_are_extra_expenses": false,
+          "rate_zero_floor_clamps": 0,
+          "policy": "portable double-precision constant-expectation TPAW research port; original native baseline remains separate"
+        },
+        "notes": [
+          "模拟至恰好100岁；超过该年龄的死亡与资产风险没有外推。",
+          "支出图显示逐点分位数；支出削减月数按完整路径计算。",
+          "短历史及其重抽样路径比例不是未来几十年安全概率。前瞻收益与波动为绝对替换目标。",
+          "名义存款合约、提前支取损失与国债价格单独记账；实际消费使用所设CPI公布滞后。"
+        ]
+      }
+    },
+    {
+      "scenario": {
+        "name": "Generic browser reference",
+        "initial_assets": 120000,
+        "reserve": 15000,
+        "current_age": 78,
+        "evaluation_month": "2026-11",
+        "candidates": "2027-02,2027-08,2028-02",
+        "notice_months": 3,
+        "annual_budget": 6000,
+        "threshold_annual": 6000,
+        "horizon": "rolling",
+        "margin": 5,
+        "stock_return": 4,
+        "stock_volatility": 18,
+        "planning_defensive_return": 0.5,
+        "time_preference": 0,
+        "risk_tolerance": 12,
+        "cash_multiple": 1.5,
+        "term_years": 5,
+        "defensive": "government_bond",
+        "runs": 4,
+        "seed": 1,
+        "use_forward_targets": true,
+        "initial_deposit_rate": 0.03,
+        "initial_government_yield": 0.035,
+        "demand_rate": 0.005,
+        "monthly_savings": 1000,
+        "planning_cpi": 0.025,
+        "reserve_cash_rate": 0.01,
+        "cashflow_rows": [
+          {
+            "kind": "essential",
+            "reference": "retirement",
+            "start": 0,
+            "amount": 1500,
+            "basis": "nominal",
+            "duration_months": 3
+          },
+          {
+            "kind": "budget",
+            "reference": "retirement",
+            "start": 12,
+            "amount": 7200,
+            "basis": "real",
+            "duration_months": 1440
+          },
+          {
+            "kind": "reserve_draw",
+            "reference": "retirement",
+            "start": 1,
+            "amount": 2000,
+            "basis": "nominal",
+            "duration_months": 1
+          }
+        ]
+      },
+      "result": {
+        "label": "Generic browser reference",
+        "profiles": [
+          {
+            "age": 78.0,
+            "p5": 11307.763251075487,
+            "p50": 11433.560678825103,
+            "p95": 11507.169687423224,
+            "months_summed": 12
+          },
+          {
+            "age": 79.0,
+            "p5": 9205.729114215652,
+            "p50": 9405.948261445565,
+            "p95": 9482.111736040053,
+            "months_summed": 12
+          },
+          {
+            "age": 80.0,
+            "p5": 9310.018254141221,
+            "p50": 9507.6615104273,
+            "p95": 9582.97489028779,
+            "months_summed": 12
+          },
+          {
+            "age": 81.0,
+            "p5": 9412.784459971417,
+            "p50": 9605.383928942152,
+            "p95": 9681.662626403826,
+            "months_summed": 12
+          },
+          {
+            "age": 82.0,
+            "p5": 9512.145952229668,
+            "p50": 9699.687798586774,
+            "p95": 9778.887271979238,
+            "months_summed": 12
+          },
+          {
+            "age": 83.0,
+            "p5": 8300.688553514441,
+            "p50": 8693.408998910127,
+            "p95": 8861.345665841978,
+            "months_summed": 12
+          },
+          {
+            "age": 84.0,
+            "p5": 7368.028906042289,
+            "p50": 7714.899226392201,
+            "p95": 7860.73383636517,
+            "months_summed": 12
+          },
+          {
+            "age": 85.0,
+            "p5": 6534.6745926708045,
+            "p50": 6841.434668344855,
+            "p95": 6969.216838480294,
+            "months_summed": 12
+          },
+          {
+            "age": 86.0,
+            "p5": 5789.42329309592,
+            "p50": 6061.741982858975,
+            "p95": 6175.469162447635,
+            "months_summed": 12
+          },
+          {
+            "age": 87.0,
+            "p5": 5122.906349044068,
+            "p50": 5365.888854968342,
+            "p95": 5468.783309599368,
+            "months_summed": 12
+          },
+          {
+            "age": 88.0,
+            "p5": 4505.129676787432,
+            "p50": 4747.134548088898,
+            "p95": 4937.676368174953,
+            "months_summed": 12
+          },
+          {
+            "age": 89.0,
+            "p5": 3977.017020385881,
+            "p50": 4194.122872679667,
+            "p95": 4362.135634763324,
+            "months_summed": 12
+          },
+          {
+            "age": 90.0,
+            "p5": 3505.13717512048,
+            "p50": 3699.790301334666,
+            "p95": 3849.4853248364298,
+            "months_summed": 12
+          },
+          {
+            "age": 91.0,
+            "p5": 3084.008990673924,
+            "p50": 3258.2258033143094,
+            "p95": 3392.9641561669714,
+            "months_summed": 12
+          },
+          {
+            "age": 92.0,
+            "p5": 2708.650586143012,
+            "p50": 2864.135743804737,
+            "p95": 2986.3189716646316,
+            "months_summed": 12
+          },
+          {
+            "age": 93.0,
+            "p5": 2406.743349288904,
+            "p50": 2506.272225518438,
+            "p95": 2614.973519348114,
+            "months_summed": 12
+          },
+          {
+            "age": 94.0,
+            "p5": 2105.9783379860382,
+            "p50": 2194.4363600573943,
+            "p95": 2292.4765722974844,
+            "months_summed": 12
+          },
+          {
+            "age": 95.0,
+            "p5": 1831.7522317668443,
+            "p50": 1915.0155721650913,
+            "p95": 2004.7888848110858,
+            "months_summed": 12
+          },
+          {
+            "age": 96.0,
+            "p5": 1582.0342844799927,
+            "p50": 1658.9641731098372,
+            "p95": 1740.6692470851633,
+            "months_summed": 12
+          },
+          {
+            "age": 97.0,
+            "p5": 1359.9570866243596,
+            "p50": 1426.3694987483864,
+            "p95": 1498.7568163780059,
+            "months_summed": 12
+          },
+          {
+            "age": 98.0,
+            "p5": 1165.8887515081367,
+            "p50": 1222.0779753659845,
+            "p95": 1284.3976905843313,
+            "months_summed": 12
+          },
+          {
+            "age": 99.0,
+            "p5": 998.8041432189253,
+            "p50": 1046.97570633189,
+            "p95": 1100.3959013244244,
+            "months_summed": 12
+          }
+        ],
+        "distributions": {
+          "estate_at_death_before100_q5_q50_q95": [
+            28668.472289190395,
+            52948.94020981061,
+            112876.00833578176
+          ],
+          "assets_if_alive100_q5_q50_q95": [
+            25141.724172127728,
+            28638.851941023757,
+            30454.2714293601
+          ],
+          "late_max_budget_cut_fraction_q5_q50_q95": [
+            0.8489770714499885,
+            0.8563150767040373,
+            0.862727932855018
+          ],
+          "late_longest_short_spell_months_q5_q50_q95": [
+            180.0,
+            180.0,
+            180.0
+          ],
+          "sampling_path_fraction_any_cash_floor_short": 1.0,
+          "sampling_path_fraction_any_unfunded_consumption": 0.0,
+          "sampling_path_fraction_any_reserve_short": 0.0,
+          "initial_spending_months_min_max": [
+            12,
+            12
+          ],
+          "whole_retirement_budget_short_months_q5_q50_q95": [
+            180.0,
+            180.0,
+            181.7
+          ],
+          "ever_late_budget_short_conditional_alive_late_start": 0.9300803275378354
+        },
+        "summary": [
+          {
+            "name": "退休后首12个月日常支出中位数",
+            "value": "¥13,767"
+          },
+          {
+            "name": "80 岁后预算不足月数中位数（存活至100）",
+            "value": "180 月"
+          },
+          {
+            "name": "死亡时资产中位数（仅100岁前死亡）",
+            "value": "¥52,949"
+          },
+          {
+            "name": "80岁后最大预算削减幅度中位数",
+            "value": "85.6%"
+          },
+          {
+            "name": "最长连续不足时长中位数（存活至100）",
+            "value": "180 月"
+          },
+          {
+            "name": "被迫在门槛下退休的路径比例",
+            "value": "0.0%"
+          }
+        ],
+        "mortality": {
+          "source": {
+            "kind": "synthetic unit test"
+          },
+          "survival_to100": 0.7189237334319261,
+          "conditioned_alive_at_evaluation_age": true
+        },
+        "provenance": {
+          "history_kind": "synthetic_stress",
+          "history_start": "1990-01",
+          "history_end": "2004-12",
+          "sources": [
+            "synthetic"
+          ],
+          "limitations": [
+            "Not empirical data",
+            "Forward targets replace historical equity moments; no second valuation adjustment. Residual ordering and paired macro/yield rows retained; empirical correlation can change after transformation."
+          ],
+          "sample_index_sha256": "4b0cd758302601c7f0dab9e867811c6eecd33a8a8d01d920d5faee54b934bf33",
+          "sampler": "joint non-circular contiguous 60-month blocks",
+          "defensive_rate_mode": "constant",
+          "defensive_rates_are_product_quotes": false,
+          "cpi_publication_lag_months": 1,
+          "historical_rate_process": "joint observed absolute curve changes; zero floor; explicit pull-to-sampled-level if persistence<1",
+          "rate_persistence": 1,
+          "reserve_funding": "initial",
+          "reserve_basis": "real",
+          "cashflow_planning_cpi": 0.025,
+          "budget_rows_are_extra_expenses": false,
+          "rate_zero_floor_clamps": 0,
+          "policy": "portable double-precision constant-expectation TPAW research port; original native baseline remains separate"
+        },
+        "notes": [
+          "模拟至恰好100岁；超过该年龄的死亡与资产风险没有外推。",
+          "支出图显示逐点分位数；支出削减月数按完整路径计算。",
+          "短历史及其重抽样路径比例不是未来几十年安全概率。前瞻收益与波动为绝对替换目标。",
+          "名义存款合约、提前支取损失与国债价格单独记账；实际消费使用所设CPI公布滞后。"
+        ]
+      }
+    },
+    {
+      "scenario": {
+        "name": "Generic browser reference",
+        "initial_assets": 120000,
+        "reserve": 15000,
+        "current_age": 78,
+        "evaluation_month": "2026-11",
+        "candidates": "2027-02,2027-08,2028-02",
+        "notice_months": 3,
+        "annual_budget": 6000,
+        "threshold_annual": 6000,
+        "horizon": "fixed90",
+        "margin": 5,
+        "stock_return": 4,
+        "stock_volatility": 18,
+        "planning_defensive_return": 0.5,
+        "time_preference": 0,
+        "risk_tolerance": 12,
+        "cash_multiple": 1.5,
+        "term_years": 5,
+        "defensive": "government_bond",
+        "runs": 4,
+        "seed": 1,
+        "use_forward_targets": true,
+        "initial_deposit_rate": 0.03,
+        "initial_government_yield": 0.035,
+        "demand_rate": 0.005,
+        "monthly_savings": 1000,
+        "planning_cpi": 0.025,
+        "reserve_cash_rate": 0.01,
+        "cashflow_rows": [
+          {
+            "kind": "essential",
+            "reference": "retirement",
+            "start": 0,
+            "amount": 1500,
+            "basis": "nominal",
+            "duration_months": 3
+          },
+          {
+            "kind": "budget",
+            "reference": "retirement",
+            "start": 12,
+            "amount": 7200,
+            "basis": "real",
+            "duration_months": 1440
+          },
+          {
+            "kind": "reserve_draw",
+            "reference": "retirement",
+            "start": 1,
+            "amount": 2000,
+            "basis": "nominal",
+            "duration_months": 1
+          }
+        ]
+      },
+      "result": {
+        "label": "Generic browser reference",
+        "profiles": [
+          {
+            "age": 78.0,
+            "p5": 11307.763251075487,
+            "p50": 11433.560678825103,
+            "p95": 11507.169687423224,
+            "months_summed": 12
+          },
+          {
+            "age": 79.0,
+            "p5": 9205.729114215652,
+            "p50": 9405.948261445565,
+            "p95": 9482.111736040053,
+            "months_summed": 12
+          },
+          {
+            "age": 80.0,
+            "p5": 9310.018254141221,
+            "p50": 9507.6615104273,
+            "p95": 9582.97489028779,
+            "months_summed": 12
+          },
+          {
+            "age": 81.0,
+            "p5": 9412.784459971417,
+            "p50": 9605.383928942152,
+            "p95": 9681.662626403826,
+            "months_summed": 12
+          },
+          {
+            "age": 82.0,
+            "p5": 9512.145952229668,
+            "p50": 9699.687798586774,
+            "p95": 9778.887271979238,
+            "months_summed": 12
+          },
+          {
+            "age": 83.0,
+            "p5": 9439.18097572157,
+            "p50": 9885.772260601141,
+            "p95": 10076.744941683486,
+            "months_summed": 12
+          },
+          {
+            "age": 84.0,
+            "p5": 9526.644196473744,
+            "p50": 9975.202732671676,
+            "p95": 10163.78866784376,
+            "months_summed": 12
+          },
+          {
+            "age": 85.0,
+            "p5": 9603.583283998092,
+            "p50": 10054.687870272257,
+            "p95": 10242.59890198578,
+            "months_summed": 12
+          },
+          {
+            "age": 86.0,
+            "p5": 9663.302975605551,
+            "p50": 10118.704056773771,
+            "p95": 10308.908598143487,
+            "months_summed": 12
+          },
+          {
+            "age": 87.0,
+            "p5": 9694.36335240999,
+            "p50": 10156.491340386478,
+            "p95": 10352.242268966673,
+            "months_summed": 12
+          },
+          {
+            "age": 88.0,
+            "p5": 9624.020664489513,
+            "p50": 10162.543167405183,
+            "p95": 10541.204666331678,
+            "months_summed": 12
+          },
+          {
+            "age": 89.0,
+            "p5": 9452.723655266791,
+            "p50": 9920.752067290323,
+            "p95": 10413.23967152406,
+            "months_summed": 12
+          },
+          {
+            "age": 90.0,
+            "p5": 778.1840385408866,
+            "p50": 816.5730321687495,
+            "p95": 854.4966069807971,
+            "months_summed": 12
+          },
+          {
+            "age": 91.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          },
+          {
+            "age": 92.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          },
+          {
+            "age": 93.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          },
+          {
+            "age": 94.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          },
+          {
+            "age": 95.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          },
+          {
+            "age": 96.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          },
+          {
+            "age": 97.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          },
+          {
+            "age": 98.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          },
+          {
+            "age": 99.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          }
+        ],
+        "distributions": {
+          "estate_at_death_before100_q5_q50_q95": [
+            16244.513621869264,
+            36222.46603038988,
+            112876.00833578176
+          ],
+          "assets_if_alive100_q5_q50_q95": [
+            18332.056038497987,
+            21506.07801208781,
+            22945.341441223907
+          ],
+          "late_max_budget_cut_fraction_q5_q50_q95": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "late_longest_short_spell_months_q5_q50_q95": [
+            119.0,
+            119.0,
+            119.0
+          ],
+          "sampling_path_fraction_any_cash_floor_short": 1.0,
+          "sampling_path_fraction_any_unfunded_consumption": 0.0,
+          "sampling_path_fraction_any_reserve_short": 0.0,
+          "initial_spending_months_min_max": [
+            12,
+            12
+          ],
+          "whole_retirement_budget_short_months_q5_q50_q95": [
+            119.0,
+            119.0,
+            119.0
+          ],
+          "ever_late_budget_short_conditional_alive_late_start": 0.8596401203969627
+        },
+        "summary": [
+          {
+            "name": "退休后首12个月日常支出中位数",
+            "value": "¥13,767"
+          },
+          {
+            "name": "80 岁后预算不足月数中位数（存活至100）",
+            "value": "119 月"
+          },
+          {
+            "name": "死亡时资产中位数（仅100岁前死亡）",
+            "value": "¥36,222"
+          },
+          {
+            "name": "80岁后最大预算削减幅度中位数",
+            "value": "100.0%"
+          },
+          {
+            "name": "最长连续不足时长中位数（存活至100）",
+            "value": "119 月"
+          },
+          {
+            "name": "被迫在门槛下退休的路径比例",
+            "value": "0.0%"
+          }
+        ],
+        "mortality": {
+          "source": {
+            "kind": "synthetic unit test"
+          },
+          "survival_to100": 0.7189237334319261,
+          "conditioned_alive_at_evaluation_age": true
+        },
+        "provenance": {
+          "history_kind": "synthetic_stress",
+          "history_start": "1990-01",
+          "history_end": "2004-12",
+          "sources": [
+            "synthetic"
+          ],
+          "limitations": [
+            "Not empirical data",
+            "Forward targets replace historical equity moments; no second valuation adjustment. Residual ordering and paired macro/yield rows retained; empirical correlation can change after transformation."
+          ],
+          "sample_index_sha256": "4b0cd758302601c7f0dab9e867811c6eecd33a8a8d01d920d5faee54b934bf33",
+          "sampler": "joint non-circular contiguous 60-month blocks",
+          "defensive_rate_mode": "constant",
+          "defensive_rates_are_product_quotes": false,
+          "cpi_publication_lag_months": 1,
+          "historical_rate_process": "joint observed absolute curve changes; zero floor; explicit pull-to-sampled-level if persistence<1",
+          "rate_persistence": 1,
+          "reserve_funding": "initial",
+          "reserve_basis": "real",
+          "cashflow_planning_cpi": 0.025,
+          "budget_rows_are_extra_expenses": false,
+          "rate_zero_floor_clamps": 0,
+          "policy": "portable double-precision constant-expectation TPAW research port; original native baseline remains separate"
+        },
+        "notes": [
+          "模拟至恰好100岁；超过该年龄的死亡与资产风险没有外推。",
+          "支出图显示逐点分位数；支出削减月数按完整路径计算。",
+          "短历史及其重抽样路径比例不是未来几十年安全概率。前瞻收益与波动为绝对替换目标。",
+          "名义存款合约、提前支取损失与国债价格单独记账；实际消费使用所设CPI公布滞后。"
+        ]
+      }
+    },
+    {
+      "scenario": {
+        "name": "Generic browser reference",
+        "initial_assets": 120000,
+        "reserve": 15000,
+        "current_age": 78,
+        "evaluation_month": "2026-11",
+        "candidates": "2027-02,2027-08,2028-02",
+        "notice_months": 3,
+        "annual_budget": 6000,
+        "threshold_annual": 6000,
+        "horizon": "rolling",
+        "margin": 5,
+        "stock_return": 4,
+        "stock_volatility": 18,
+        "planning_defensive_return": 0.5,
+        "time_preference": 0,
+        "risk_tolerance": 12,
+        "cash_multiple": 1.5,
+        "term_years": 5,
+        "defensive": "cash",
+        "runs": 4,
+        "seed": 1,
+        "use_forward_targets": true,
+        "initial_deposit_rate": 0.03,
+        "initial_government_yield": 0.035,
+        "demand_rate": 0.005,
+        "monthly_savings": 1000,
+        "planning_cpi": 0.025,
+        "reserve_cash_rate": 0.01,
+        "cashflow_rows": [
+          {
+            "kind": "essential",
+            "reference": "retirement",
+            "start": 0,
+            "amount": 1500,
+            "basis": "nominal",
+            "duration_months": 3
+          },
+          {
+            "kind": "budget",
+            "reference": "retirement",
+            "start": 12,
+            "amount": 7200,
+            "basis": "real",
+            "duration_months": 1440
+          },
+          {
+            "kind": "reserve_draw",
+            "reference": "retirement",
+            "start": 1,
+            "amount": 2000,
+            "basis": "nominal",
+            "duration_months": 1
+          }
+        ]
+      },
+      "result": {
+        "label": "Generic browser reference",
+        "profiles": [
+          {
+            "age": 78.0,
+            "p5": 11231.198352080948,
+            "p50": 11355.547470939462,
+            "p95": 11428.346727903356,
+            "months_summed": 12
+          },
+          {
+            "age": 79.0,
+            "p5": 8957.022823269823,
+            "p50": 9151.328151901875,
+            "p95": 9225.150546679115,
+            "months_summed": 12
+          },
+          {
+            "age": 80.0,
+            "p5": 8898.37366257148,
+            "p50": 9085.964314795096,
+            "p95": 9157.484522753399,
+            "months_summed": 12
+          },
+          {
+            "age": 81.0,
+            "p5": 8840.360516235043,
+            "p50": 9019.181282319003,
+            "p95": 9090.170392502047,
+            "months_summed": 12
+          },
+          {
+            "age": 82.0,
+            "p5": 8781.853960743269,
+            "p50": 8952.247062641694,
+            "p95": 9024.48076842287,
+            "months_summed": 12
+          },
+          {
+            "age": 83.0,
+            "p5": 7536.737995008652,
+            "p50": 7890.275243633104,
+            "p95": 8041.940276047541,
+            "months_summed": 12
+          },
+          {
+            "age": 84.0,
+            "p5": 6583.850079908636,
+            "p50": 6889.438198053922,
+            "p95": 7018.345675399366,
+            "months_summed": 12
+          },
+          {
+            "age": 85.0,
+            "p5": 5750.403892826808,
+            "p50": 6014.885984108141,
+            "p95": 6125.4552536854735,
+            "months_summed": 12
+          },
+          {
+            "age": 86.0,
+            "p5": 5020.936498657345,
+            "p50": 5250.721481806498,
+            "p95": 5347.071511311266,
+            "months_summed": 12
+          },
+          {
+            "age": 87.0,
+            "p5": 4382.476621822072,
+            "p50": 4583.154257230373,
+            "p95": 4668.522191091815,
+            "months_summed": 12
+          },
+          {
+            "age": 88.0,
+            "p5": 3805.4713633869387,
+            "p50": 4001.928618848935,
+            "p95": 4159.336036418545,
+            "months_summed": 12
+          },
+          {
+            "age": 89.0,
+            "p5": 3320.98817033988,
+            "p50": 3493.498710025675,
+            "p95": 3629.2987519029607,
+            "months_summed": 12
+          },
+          {
+            "age": 90.0,
+            "p5": 2897.355789741288,
+            "p50": 3048.749610275261,
+            "p95": 3167.1485443657634,
+            "months_summed": 12
+          },
+          {
+            "age": 91.0,
+            "p5": 2527.403504390987,
+            "p50": 2660.031271323507,
+            "p95": 2764.348815354554,
+            "months_summed": 12
+          },
+          {
+            "age": 92.0,
+            "p5": 2204.7216967970203,
+            "p50": 2320.5690126688833,
+            "p95": 2413.213524473502,
+            "months_summed": 12
+          },
+          {
+            "age": 93.0,
+            "p5": 1947.8691681448825,
+            "p50": 2018.9041573743043,
+            "p95": 2099.773525562422,
+            "months_summed": 12
+          },
+          {
+            "age": 94.0,
+            "p5": 1687.4906420874731,
+            "p50": 1753.6581090874622,
+            "p95": 1829.0928198815939,
+            "months_summed": 12
+          },
+          {
+            "age": 95.0,
+            "p5": 1452.183987866174,
+            "p50": 1512.076513379909,
+            "p95": 1580.0552716227023,
+            "months_summed": 12
+          },
+          {
+            "age": 96.0,
+            "p5": 1245.1216459845723,
+            "p50": 1296.202078811039,
+            "p95": 1354.125878895439,
+            "months_summed": 12
+          },
+          {
+            "age": 97.0,
+            "p5": 1066.7640151204353,
+            "p50": 1110.4622514204293,
+            "p95": 1160.124126176563,
+            "months_summed": 12
+          },
+          {
+            "age": 98.0,
+            "p5": 914.5103972154923,
+            "p50": 951.2371917410369,
+            "p95": 993.8111647700352,
+            "months_summed": 12
+          },
+          {
+            "age": 99.0,
+            "p5": 783.4509796153131,
+            "p50": 814.9416916276539,
+            "p95": 851.438517632653,
+            "months_summed": 12
+          }
+        ],
+        "distributions": {
+          "estate_at_death_before100_q5_q50_q95": [
+            26550.34513481893,
+            47334.03957629551,
+            110874.1403879489
+          ],
+          "assets_if_alive100_q5_q50_q95": [
+            23673.496472074603,
+            27058.056664180593,
+            28755.422542766188
+          ],
+          "late_max_budget_cut_fraction_q5_q50_q95": [
+            0.8831448280533628,
+            0.8881592779463635,
+            0.8923248450183268
+          ],
+          "late_longest_short_spell_months_q5_q50_q95": [
+            192.0,
+            192.0,
+            192.0
+          ],
+          "sampling_path_fraction_any_cash_floor_short": 1.0,
+          "sampling_path_fraction_any_unfunded_consumption": 0.0,
+          "sampling_path_fraction_any_reserve_short": 0.0,
+          "initial_spending_months_min_max": [
+            12,
+            12
+          ],
+          "whole_retirement_budget_short_months_q5_q50_q95": [
+            192.0,
+            192.0,
+            192.0
+          ],
+          "ever_late_budget_short_conditional_alive_late_start": 0.9417645335842486
+        },
+        "summary": [
+          {
+            "name": "退休后首12个月日常支出中位数",
+            "value": "¥13,642"
+          },
+          {
+            "name": "80 岁后预算不足月数中位数（存活至100）",
+            "value": "192 月"
+          },
+          {
+            "name": "死亡时资产中位数（仅100岁前死亡）",
+            "value": "¥47,334"
+          },
+          {
+            "name": "80岁后最大预算削减幅度中位数",
+            "value": "88.8%"
+          },
+          {
+            "name": "最长连续不足时长中位数（存活至100）",
+            "value": "192 月"
+          },
+          {
+            "name": "被迫在门槛下退休的路径比例",
+            "value": "0.0%"
+          }
+        ],
+        "mortality": {
+          "source": {
+            "kind": "synthetic unit test"
+          },
+          "survival_to100": 0.7189237334319261,
+          "conditioned_alive_at_evaluation_age": true
+        },
+        "provenance": {
+          "history_kind": "synthetic_stress",
+          "history_start": "1990-01",
+          "history_end": "2004-12",
+          "sources": [
+            "synthetic"
+          ],
+          "limitations": [
+            "Not empirical data",
+            "Forward targets replace historical equity moments; no second valuation adjustment. Residual ordering and paired macro/yield rows retained; empirical correlation can change after transformation."
+          ],
+          "sample_index_sha256": "4b0cd758302601c7f0dab9e867811c6eecd33a8a8d01d920d5faee54b934bf33",
+          "sampler": "joint non-circular contiguous 60-month blocks",
+          "defensive_rate_mode": "constant",
+          "defensive_rates_are_product_quotes": false,
+          "cpi_publication_lag_months": 1,
+          "historical_rate_process": "joint observed absolute curve changes; zero floor; explicit pull-to-sampled-level if persistence<1",
+          "rate_persistence": 1,
+          "reserve_funding": "initial",
+          "reserve_basis": "real",
+          "cashflow_planning_cpi": 0.025,
+          "budget_rows_are_extra_expenses": false,
+          "rate_zero_floor_clamps": 0,
+          "policy": "portable double-precision constant-expectation TPAW research port; original native baseline remains separate"
+        },
+        "notes": [
+          "模拟至恰好100岁；超过该年龄的死亡与资产风险没有外推。",
+          "支出图显示逐点分位数；支出削减月数按完整路径计算。",
+          "短历史及其重抽样路径比例不是未来几十年安全概率。前瞻收益与波动为绝对替换目标。",
+          "名义存款合约、提前支取损失与国债价格单独记账；实际消费使用所设CPI公布滞后。"
+        ]
+      }
+    },
+    {
+      "scenario": {
+        "name": "Generic browser reference",
+        "initial_assets": 120000,
+        "reserve": 15000,
+        "current_age": 78,
+        "evaluation_month": "2026-11",
+        "candidates": "2027-02,2027-08,2028-02",
+        "notice_months": 3,
+        "annual_budget": 6000,
+        "threshold_annual": 6000,
+        "horizon": "fixed90",
+        "margin": 5,
+        "stock_return": 4,
+        "stock_volatility": 18,
+        "planning_defensive_return": 0.5,
+        "time_preference": 0,
+        "risk_tolerance": 12,
+        "cash_multiple": 1.5,
+        "term_years": 5,
+        "defensive": "cash",
+        "runs": 4,
+        "seed": 1,
+        "use_forward_targets": true,
+        "initial_deposit_rate": 0.03,
+        "initial_government_yield": 0.035,
+        "demand_rate": 0.005,
+        "monthly_savings": 1000,
+        "planning_cpi": 0.025,
+        "reserve_cash_rate": 0.01,
+        "cashflow_rows": [
+          {
+            "kind": "essential",
+            "reference": "retirement",
+            "start": 0,
+            "amount": 1500,
+            "basis": "nominal",
+            "duration_months": 3
+          },
+          {
+            "kind": "budget",
+            "reference": "retirement",
+            "start": 12,
+            "amount": 7200,
+            "basis": "real",
+            "duration_months": 1440
+          },
+          {
+            "kind": "reserve_draw",
+            "reference": "retirement",
+            "start": 1,
+            "amount": 2000,
+            "basis": "nominal",
+            "duration_months": 1
+          }
+        ]
+      },
+      "result": {
+        "label": "Generic browser reference",
+        "profiles": [
+          {
+            "age": 78.0,
+            "p5": 11231.198352080948,
+            "p50": 11355.547470939462,
+            "p95": 11428.346727903356,
+            "months_summed": 12
+          },
+          {
+            "age": 79.0,
+            "p5": 8957.022823269823,
+            "p50": 9151.328151901875,
+            "p95": 9225.150546679115,
+            "months_summed": 12
+          },
+          {
+            "age": 80.0,
+            "p5": 8898.37366257148,
+            "p50": 9085.964314795096,
+            "p95": 9157.484522753399,
+            "months_summed": 12
+          },
+          {
+            "age": 81.0,
+            "p5": 8840.360516235043,
+            "p50": 9019.181282319003,
+            "p95": 9090.170392502047,
+            "months_summed": 12
+          },
+          {
+            "age": 82.0,
+            "p5": 8781.853960743269,
+            "p50": 8952.247062641694,
+            "p95": 9024.48076842287,
+            "months_summed": 12
+          },
+          {
+            "age": 83.0,
+            "p5": 8570.587828861577,
+            "p50": 8972.621446338613,
+            "p95": 9145.091085290627,
+            "months_summed": 12
+          },
+          {
+            "age": 84.0,
+            "p5": 8514.026796886628,
+            "p50": 8909.203691123452,
+            "p95": 9075.902765846824,
+            "months_summed": 12
+          },
+          {
+            "age": 85.0,
+            "p5": 8456.327998085093,
+            "p50": 8845.265428425315,
+            "p95": 9007.864443639006,
+            "months_summed": 12
+          },
+          {
+            "age": 86.0,
+            "p5": 8396.473668293198,
+            "p50": 8780.741336465664,
+            "p95": 8941.86675318671,
+            "months_summed": 12
+          },
+          {
+            "age": 87.0,
+            "p5": 8334.139211484086,
+            "p50": 8715.767111515852,
+            "p95": 8878.110988367434,
+            "months_summed": 12
+          },
+          {
+            "age": 88.0,
+            "p5": 8190.98812674985,
+            "p50": 8641.026605229525,
+            "p95": 8959.674175001373,
+            "months_summed": 12
+          },
+          {
+            "age": 89.0,
+            "p5": 7996.680089037902,
+            "p50": 8459.595030137649,
+            "p95": 8757.550941186519,
+            "months_summed": 12
+          },
+          {
+            "age": 90.0,
+            "p5": 658.3170382910279,
+            "p50": 696.3047363734142,
+            "p95": 718.6396281728823,
+            "months_summed": 12
+          },
+          {
+            "age": 91.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          },
+          {
+            "age": 92.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          },
+          {
+            "age": 93.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          },
+          {
+            "age": 94.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          },
+          {
+            "age": 95.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          },
+          {
+            "age": 96.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          },
+          {
+            "age": 97.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          },
+          {
+            "age": 98.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          },
+          {
+            "age": 99.0,
+            "p5": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "months_summed": 12
+          }
+        ],
+        "distributions": {
+          "estate_at_death_before100_q5_q50_q95": [
+            16244.513621869264,
+            33360.533232422684,
+            110874.1403879489
+          ],
+          "assets_if_alive100_q5_q50_q95": [
+            18332.056038497987,
+            21506.07801208781,
+            22945.341441223907
+          ],
+          "late_max_budget_cut_fraction_q5_q50_q95": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "late_longest_short_spell_months_q5_q50_q95": [
+            119.0,
+            119.0,
+            119.0
+          ],
+          "sampling_path_fraction_any_cash_floor_short": 1.0,
+          "sampling_path_fraction_any_unfunded_consumption": 0.0,
+          "sampling_path_fraction_any_reserve_short": 0.0,
+          "initial_spending_months_min_max": [
+            12,
+            12
+          ],
+          "whole_retirement_budget_short_months_q5_q50_q95": [
+            119.0,
+            119.0,
+            119.0
+          ],
+          "ever_late_budget_short_conditional_alive_late_start": 0.8596401203969627
+        },
+        "summary": [
+          {
+            "name": "退休后首12个月日常支出中位数",
+            "value": "¥13,642"
+          },
+          {
+            "name": "80 岁后预算不足月数中位数（存活至100）",
+            "value": "119 月"
+          },
+          {
+            "name": "死亡时资产中位数（仅100岁前死亡）",
+            "value": "¥33,361"
+          },
+          {
+            "name": "80岁后最大预算削减幅度中位数",
+            "value": "100.0%"
+          },
+          {
+            "name": "最长连续不足时长中位数（存活至100）",
+            "value": "119 月"
+          },
+          {
+            "name": "被迫在门槛下退休的路径比例",
+            "value": "0.0%"
+          }
+        ],
+        "mortality": {
+          "source": {
+            "kind": "synthetic unit test"
+          },
+          "survival_to100": 0.7189237334319261,
+          "conditioned_alive_at_evaluation_age": true
+        },
+        "provenance": {
+          "history_kind": "synthetic_stress",
+          "history_start": "1990-01",
+          "history_end": "2004-12",
+          "sources": [
+            "synthetic"
+          ],
+          "limitations": [
+            "Not empirical data",
+            "Forward targets replace historical equity moments; no second valuation adjustment. Residual ordering and paired macro/yield rows retained; empirical correlation can change after transformation."
+          ],
+          "sample_index_sha256": "4b0cd758302601c7f0dab9e867811c6eecd33a8a8d01d920d5faee54b934bf33",
+          "sampler": "joint non-circular contiguous 60-month blocks",
+          "defensive_rate_mode": "constant",
+          "defensive_rates_are_product_quotes": false,
+          "cpi_publication_lag_months": 1,
+          "historical_rate_process": "joint observed absolute curve changes; zero floor; explicit pull-to-sampled-level if persistence<1",
+          "rate_persistence": 1,
+          "reserve_funding": "initial",
+          "reserve_basis": "real",
+          "cashflow_planning_cpi": 0.025,
+          "budget_rows_are_extra_expenses": false,
+          "rate_zero_floor_clamps": 0,
+          "policy": "portable double-precision constant-expectation TPAW research port; original native baseline remains separate"
+        },
+        "notes": [
+          "模拟至恰好100岁；超过该年龄的死亡与资产风险没有外推。",
+          "支出图显示逐点分位数；支出削减月数按完整路径计算。",
+          "短历史及其重抽样路径比例不是未来几十年安全概率。前瞻收益与波动为绝对替换目标。",
+          "名义存款合约、提前支取损失与国债价格单独记账；实际消费使用所设CPI公布滞后。"
+        ]
+      }
+    }
+  ]
+}

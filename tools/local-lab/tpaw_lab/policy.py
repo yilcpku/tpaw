@@ -113,20 +113,24 @@ class TpawPolicy:
                           p.time_preference, p.additional_spending_tilt, gamma) for gamma in p.rra]
         legacy_weight = merton(p.stock_mu_annual, p.bond_mu_annual, p.stock_annual_log_variance,
                                 p.time_preference, p.additional_spending_tilt, p.legacy_rra)[0]
-        entries = []
-        for m, end in enumerate(p.end_by_month):
+        entries = [None]*len(p.end_by_month)
+        grouped={}
+        for m,end in enumerate(p.end_by_month):grouped.setdefault(end,[]).append(m)
+        legacy_gross = 1 + self.expected_bond + (self.expected_stock - self.expected_bond) * legacy_weight
+        for end,months in grouped.items():
+            targets=set(months)
             income = essential = discretionary = denominator = 0.0
-            for future in range(end - 1, m - 1, -1):
+            for future in range(end - 1, months[0] - 1, -1):
                 weight, tilt = mertons[future]
                 portfolio_gross = 1 + self.expected_bond + (self.expected_stock - self.expected_bond) * weight
                 income = income / (1 + self.expected_bond) + p.income[future]
                 essential = essential / (1 + self.expected_bond) + p.essential[future]
                 discretionary = discretionary / portfolio_gross + p.discretionary[future]
                 denominator = denominator * (1 + tilt) / portfolio_gross + 1
-            legacy_gross = 1 + self.expected_bond + (self.expected_stock - self.expected_bond) * legacy_weight
-            weight, tilt = mertons[m]
-            entries.append(Entry(income - p.income[m], essential - p.essential[m], discretionary - p.discretionary[m],
-                                 p.legacy / legacy_gross ** (end - m), weight, legacy_weight, denominator, tilt))
+                if future in targets:
+                    m=future
+                    entries[m]=Entry(income-p.income[m],essential-p.essential[m],discretionary-p.discretionary[m],
+                        p.legacy/legacy_gross**(end-m),weight,legacy_weight,denominator,tilt)
         return tuple(entries)
 
     def _pre(self, balance: float, m: int, expected: bool):

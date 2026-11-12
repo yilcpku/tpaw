@@ -282,20 +282,23 @@ def run_path(s: dict, history: JointHistory, indices: tuple[int, ...], exits: tu
             "actual_exit_general_annual":actual,"reviews":reviews,"records":records}
 
 
-def simulate(s: dict, history: JointHistory, table: LifeTable) -> dict:
+def simulate(s: dict, history: JointHistory, table: LifeTable, *, retain_paths:bool=True, progress=None) -> dict:
     age_months,h,indices,exits,policies,flows = prepare(s,history,table)
-    paths = [run_path(s,h,draw,exits,policies,flows) for draw in indices]
-    weights = table.weights(age_months,len(indices[0]))
-    profiles = []
-    for m in range(0,len(indices[0]),12):
-        # Annual sum of monthly general consumption; final partial year marked.
-        values = [sum(r["lifestyle_real"] for r in path["records"][m:m+12]) for path in paths]
-        profiles.append({"age":(age_months+m)/12,"p5":quantile(values,.05),"p50":quantile(values,.5),"p95":quantile(values,.95),
-                         "months_summed":min(12,len(indices[0])-m)})
-    late_start = max(0,960-age_months)
-    metrics = []
-    estates_at_death=[]
-    for path in paths:
+    paths=[]
+    weights=table.weights(age_months,len(indices[0]))
+    annual_values=[[] for _ in range(0,len(indices[0]),12)]
+    initial=[];initial_months=[];forced_count=0;rate_clamps=0
+    late_start=max(0,960-age_months)
+    metrics=[];estates_at_death=[]
+    for run_index,draw in enumerate(indices):
+        path=run_path(s,h,draw,exits,policies,flows)
+        if retain_paths:paths.append(path)
+        for year,m in enumerate(range(0,len(indices[0]),12)):
+            annual_values[year].append(sum(r['lifestyle_real'] for r in path['records'][m:m+12]))
+        initial.append(sum(r['lifestyle_real'] for r in path['records'][path['retirement_month']:path['retirement_month']+12]))
+        initial_months.append(min(12,len(path['records'])-path['retirement_month']))
+        forced_count+=int(path['forced_below_threshold'])
+        rate_clamps+=sum(r['rate_zero_floor_clamps'] for r in path['records'])
         cuts, longest, spell, max_cut = 0,0,0,0.0
         late_begin=max(late_start,path["retirement_month"])
         for record in path["records"][late_begin:]:
@@ -305,7 +308,7 @@ def simulate(s: dict, history: JointHistory, table: LifeTable) -> dict:
             max_cut = max(max_cut,short/budget_month if budget_month else 0)
         records = path["records"]
         estate = sum(w*r["estate_end_real"] for w,r in zip(weights["death_end"],records))
-        estates_at_death.extend((r["estate_end_real"],w/len(paths)) for w,r in zip(weights["death_end"],records) if w>0)
+        estates_at_death.extend((r["estate_end_real"],w/len(indices)) for w,r in zip(weights["death_end"],records) if w>0)
         first_short=next((m for m in range(late_begin,len(records)) if records[m]["lifestyle_real"]+1e-8<records[m]["lifestyle_budget_real"]/12),None)
         alive_late=weights["alive_start"][late_start] if late_start<len(records) else 0
         metrics.append({"late_budget_short_months_if_alive_to100":cuts,"late_longest_short_spell_months_if_alive_to100":longest,
@@ -317,11 +320,13 @@ def simulate(s: dict, history: JointHistory, table: LifeTable) -> dict:
                         "any_cash_floor_short":any(r["cash_floor_short_real"]>.01 for r in records),
                         "any_reserve_short":any(r["reserve_short_real"]>.01 or r["reserve_funding_short_real"]>.01 for r in records),
                         "whole_retirement_budget_short_months":sum(r["lifestyle_real"]+1e-8<r["lifestyle_budget_real"]/12 for r in records[path["retirement_month"]:])})
-    n = len(paths)
-    initial = [sum(r["lifestyle_real"] for r in p["records"][p["retirement_month"]:p["retirement_month"]+12]) for p in paths]
-    initial_months=[min(12,len(p['records'])-p['retirement_month']) for p in paths]
+        if progress:progress((run_index+1)/len(indices))
+    n=len(indices)
+    profiles=[{'age':(age_months+m)/12,'p5':quantile(values,.05),'p50':quantile(values,.5),'p95':quantile(values,.95),
+               'months_summed':min(12,len(indices[0])-m)} for m,values in zip(range(0,len(indices[0]),12),annual_values)]
     initial_label="退休后首12个月日常支出中位数" if min(initial_months)==12 else f"退休初段（{min(initial_months)}至{max(initial_months)}个月，100岁截断）支出中位数"
-    distribution={"estate_at_death_before100_q5_q50_q95":[weighted_quantile(estates_at_death,q) for q in (.05,.5,.95)],
+    distribution={"initial_spending_q5_q50_q95":[quantile(initial,q) for q in (.05,.5,.95)],
+                  "estate_at_death_before100_q5_q50_q95":[weighted_quantile(estates_at_death,q) for q in (.05,.5,.95)],
                   "assets_if_alive100_q5_q50_q95":[quantile([x['assets_if_alive100'] for x in metrics],q) for q in (.05,.5,.95)],
                   "late_max_budget_cut_fraction_q5_q50_q95":[quantile([x['late_max_budget_cut_fraction_if_alive_to100'] for x in metrics],q) for q in (.05,.5,.95)],
                   "late_longest_short_spell_months_q5_q50_q95":[quantile([x['late_longest_short_spell_months_if_alive_to100'] for x in metrics],q) for q in (.05,.5,.95)],
@@ -338,7 +343,7 @@ def simulate(s: dict, history: JointHistory, table: LifeTable) -> dict:
                        {"name":"死亡时资产中位数（仅100岁前死亡）","value":f"¥{distribution['estate_at_death_before100_q5_q50_q95'][1]:,.0f}"},
                        {"name":"80岁后最大预算削减幅度中位数","value":f"{distribution['late_max_budget_cut_fraction_q5_q50_q95'][1]:.1%}"},
                        {"name":"最长连续不足时长中位数（存活至100）","value":f"{distribution['late_longest_short_spell_months_q5_q50_q95'][1]:.0f} 月"},
-                       {"name":"被迫在门槛下退休的路径比例","value":f"{sum(p['forced_below_threshold'] for p in paths)/n:.1%}"}],
+                       {"name":"被迫在门槛下退休的路径比例","value":f"{forced_count/n:.1%}"}],
             "mortality":{"source":table.source,"survival_to100":weights["tail_alive"],"conditioned_alive_at_evaluation_age":True},
             "provenance":{"history_kind":h.kind,"history_start":h.rows[0].month,"history_end":h.rows[-1].month,
                           "sources":h.sources,"limitations":h.limitations,"sample_index_sha256":sample_hash,"sampler":"joint non-circular contiguous 60-month blocks",
@@ -348,7 +353,7 @@ def simulate(s: dict, history: JointHistory, table: LifeTable) -> dict:
                           "rate_persistence":s.get("rate_persistence",1),
                           "reserve_funding":s.get("reserve_funding","initial"),"reserve_basis":s.get("reserve_basis","real"),
                           "cashflow_planning_cpi":s.get("planning_cpi",.02),"budget_rows_are_extra_expenses":False,
-                          "rate_zero_floor_clamps":sum(r["rate_zero_floor_clamps"] for p in paths for r in p["records"]),
+                          "rate_zero_floor_clamps":rate_clamps,
                           "policy":"portable double-precision constant-expectation TPAW research port; original native baseline remains separate"},
             "notes":["模拟至恰好100岁；超过该年龄的死亡与资产风险没有外推。",
                      "支出图显示逐点分位数；支出削减月数按完整路径计算。",
@@ -356,13 +361,16 @@ def simulate(s: dict, history: JointHistory, table: LifeTable) -> dict:
                      "名义存款合约、提前支取损失与国债价格单独记账；实际消费使用所设CPI公布滞后。"]}
 
 
-def compare_horizons(s: dict,history: JointHistory,table: LifeTable) -> dict:
+def compare_horizons(s: dict,history: JointHistory,table: LifeTable, *, modes=None,retain_paths:bool=True,progress=None) -> dict:
     """Matched market histories, preferences, cashflows and accounting; vary end only."""
-    modes=("fixed90","fixed95","fixed100","rolling")
+    modes=tuple(modes) if modes is not None else ('fixed90','fixed95','fixed100','rolling')
+    if not modes or len(modes)!=len(set(modes)) or s['horizon'] not in modes or any(m not in ('fixed90','fixed95','fixed100','rolling') for m in modes):
+        raise ValueError('Invalid horizon comparison')
     cases={}
-    for mode in modes:
+    for mode_index,mode in enumerate(modes):
         variant={**s,"horizon":mode}
-        cases[mode]=simulate(variant,history,table)
+        report=(lambda fraction,i=mode_index:progress((i+fraction)/len(modes))) if progress else None
+        cases[mode]=simulate(variant,history,table,retain_paths=retain_paths and mode==s['horizon'],progress=report)
     signatures={case["provenance"]["sample_index_sha256"] for case in cases.values()}
     if len(signatures)!=1:
         raise ArithmeticError("Horizon comparison used different realized market draws")

@@ -5,13 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "tsc --noEmit && vite build",
+    "build": "python ../../tools/local-lab/package_browser.py --destination public/runtime && tsc --noEmit && vite build",
     "astryx": "node node_modules/@astryxdesign/cli/clients/cli/bin/astryx.mjs"
   },
   "dependencies": {
     "@astryxdesign/core": "0.7.14",
     "@astryxdesign/theme-neutral": "0.7.14",
     "@stylexjs/stylex": "0.19.2",
+    "pyodide": "314.0.7",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },

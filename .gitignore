@@ -5,6 +5,7 @@ __pycache__/
 .npm-cache/
 packages/local-lab/dist/
 packages/local-lab/dist-hosted/
+packages/local-lab/public/runtime/
 packages/simulator-rust/target/
 # Personal inputs, cached licensed data, scenarios and simulation output
 .private/
