@@ -23,7 +23,7 @@ struct Args {
 #[derive(Deserialize)]
 struct Schedule { evaluation_months:u32, planning_months:u32, end_by_month:Vec<u32> }
 fn run(a:Args)->Result<(),Box<dyn std::error::Error>> {
-    if a.output.exists() {return Err("existing output".into())}
+    if a.output.symlink_metadata().is_ok() {return Err("existing output or link".into())}
     let parent=a.output.parent().ok_or("directory")?.canonicalize()?;
     if parent.ancestors().any(|p|p.join(".git").exists()) {return Err("private directory".into())}
     let dest=CString::new(a.output.to_str().filter(|x|x.is_ascii()).ok_or("ASCII path required")?)?;

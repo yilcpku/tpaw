@@ -11,7 +11,7 @@ from test_simulation import scenario
 
 class NativeControlTests(unittest.TestCase):
     def test_native_output_rejects_dangling_file_symlink_before_parent_validation(self):
-        with patch.object(Path,'is_symlink',return_value=True),patch('tpaw_lab.native_control.private_root') as root:
+        with patch.object(Path,'is_symlink',return_value=True),patch('tpaw_lab.native.private_root') as root:
             with self.assertRaises(ValueError):private_output_path(Path('paths.csv'))
             root.assert_not_called()
 

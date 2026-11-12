@@ -17,10 +17,9 @@ from .cashflows import compile_flows
 from .market import finite,month_index,return_statistics
 from .native import (U,F,D,Pair,Ages,Opt,Adjustments,RiskTPAW,RiskSWR,Risk,
                      ReturnStats,MonteCarlo,SamplingData,Sampling,Advanced,
-                     Params,HistoricalPart,Historical,Arrays,verify_abi)
+                     Params,HistoricalPart,Historical,Arrays,verify_abi,private_output_path)
 from .policy import PolicyPlan,TpawPolicy
 from .simulation import rra_curve,quantile
-from .storage import private_root
 
 
 def verified_config(path:Path)->dict:
@@ -113,16 +112,6 @@ def export_control(plan:PolicyPlan,history,runs:int,seed:int,config:dict,output:
         function.argtypes=[U,D,C.POINTER(Params),C.POINTER(Arrays),C.POINTER(U),C.c_char_p];function.restype=C.c_int
         status=function(n,plan.initial_balance,C.byref(params),C.byref(arrays),ends,str(output.resolve()).encode('ascii'))
     if status!=0:raise RuntimeError('Native control did not complete')
-
-
-def private_output_path(output:Path)->Path:
-    if output.is_symlink() or output.exists():raise ValueError('Native output already exists or is a symbolic link')
-    root=private_root(output.parent)
-    canonical=output.resolve()
-    if not canonical.is_relative_to(root):raise ValueError('Native output escapes verified private directory')
-    try:str(canonical).encode('ascii')
-    except UnicodeEncodeError:raise ValueError('Pinned Windows native export requires an ASCII private output directory') from None
-    return canonical
 
 
 def summarize_control(plan:PolicyPlan,s:dict,output:Path)->dict:

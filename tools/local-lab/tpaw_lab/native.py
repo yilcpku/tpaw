@@ -76,12 +76,21 @@ def adjusted_history(source:Path,processed:dict,case:dict):
     return (Historical*len(result))(*result)
 
 
+def private_output_path(output:Path)->Path:
+    if output.is_symlink() or output.exists():raise ValueError('Native output already exists or is a symbolic link')
+    root=private_root(output.parent)
+    canonical=output.resolve()
+    if not canonical.is_relative_to(root):raise ValueError('Native output escapes verified private directory')
+    try:str(canonical).encode('ascii')
+    except UnicodeEncodeError:raise ValueError('Pinned Windows native export requires an ASCII private output directory') from None
+    return canonical
+
+
 def export_paths(case:dict,decoded:dict,retirement:int,dll:Path,dll_sha256:str,cuda_bin:Path,source:Path,output:Path,runs:int|None=None):
     verify_abi()
     if os.name!="nt": raise ValueError("Pinned native DLL requires Windows")
     if hashlib.sha256(dll.read_bytes()).hexdigest()!=dll_sha256: raise ValueError("Native DLL hash changed")
-    if output.exists(): raise ValueError("Native output already exists")
-    private_root(output.parent)
+    output=private_output_path(output)
     p=decoded["result"]["planParamsProcessed"]; cash=p["amountTimed"]
     risk=p["risk"]["tpaw"];preferences=case["plan"]["risk"]["tpaw"]
     if set(p["adjustmentsToSpending"]["tpawAndSpaw"])!={"legacy"}:
