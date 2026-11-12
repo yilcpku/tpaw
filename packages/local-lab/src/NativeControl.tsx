@@ -25,7 +25,7 @@ export default function NativeControl({available,candidates,scenario,runApi}: {a
   return <section><h2>用当前输入重跑原生模型</h2><p>使用表单中的资产、现金流、风险与规划参数，选择一个固定退休日及终点。原生美国实际收益和循环区块保留；人民币合约、现金底线和条件退休属于修改版，差异随结果列明。</p>
     {!available&&<p className="notice">服务未配置已固定的本地CUDA引擎；归档仍可查看。启动选项见本地工具说明。</p>}
     <div className="fields"><Selector label="原生对照固定退休月" value={retirement} options={dates.map(value=>({value,label:value}))} onChange={setChosen} width="100%"/>
-    <Selector label="原生对照固定终点" value={horizon} options={[90,95,100].map(age=>({value:'fixed'+age,label:'固定'+age+'岁'}))} onChange={setHorizon} width="100%"/></div>
+    <Selector label="原生对照固定终点" value={horizon} options={[90].map(age=>({value:'fixed'+age,label:'固定'+age+'岁'}))} onChange={setHorizon} width="100%"/></div>
     <Button label="重跑当前输入的原生对照" isDisabled={!available||!retirement} isLoading={running} onClick={run}/>
     {error&&<p role="alert">{error}</p>}{result&&<><h3>{result.label}</h3>
       {changed&&<p className="notice">表单或原生对照选项已有修改。下方保留上次结果，请重跑后再比较。</p>}

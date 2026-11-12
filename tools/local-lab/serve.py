@@ -18,7 +18,7 @@ from tpaw_lab.data_audit import audit_view
 
 
 FEATURES = [
-    {"name":"滚动规划寿命 / 固定90、95、100岁", "state":"研究扩展已接入；100岁尾部单独保留"},
+    {"name":"滚动规划寿命 / 固定90岁对照", "state":"浏览器后台计算；100岁尾部单独保留"},
     {"name":"3个月不可逆通知期与候选退休日", "state":"已接入；尚待真实长路径全面回归"},
     {"name":"人民币存款、名义国债与独立现金底线", "state":"官方国债/中行挂牌历史2006–2025；变化同步抽样，合约单独记账"},
     {"name":"原版 TPAW", "state":"归档原生基准独立保留；1000条完整路径通过预设容差回归"},
@@ -46,11 +46,11 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, *_):
         pass  # Financial values and scenario names never enter HTTP logs.
 
-    def headers_common(self):
-        self.send_header("Cache-Control","no-store")
+    def headers_common(self,immutable=False):
+        self.send_header("Cache-Control","public, max-age=31536000, immutable" if immutable else "no-store")
         self.send_header("X-Content-Type-Options","nosniff")
         self.send_header("Referrer-Policy","no-referrer")
-        self.send_header("Content-Security-Policy","default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'")
+        self.send_header("Content-Security-Policy","default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'")
 
     def allowed(self, static=False):
         host = f"127.0.0.1:{self.server.server_port}"
@@ -97,13 +97,17 @@ class Handler(BaseHTTPRequestHandler):
             if path.startswith("/api/data-audit/"):
                 data=self.server.store.get("data",path.removeprefix("/api/data-audit/"))
                 self.json(200,audit_view(data));return
+            if path.startswith('/api/browser-inputs/'):
+                source=self.server.store.get('data',path.removeprefix('/api/browser-inputs/'))
+                self.json(200,{'source':source,'mortality':self.server.store.get('data','hk-male-period-2025')});return
             relative=unquote(path).lstrip("/") or "index.html"
             file=(self.server.static/relative).resolve()
             if not file.is_relative_to(self.server.static) or not file.is_file():
                 self.json(404,{"error":"Local file not found"});return
             body=file.read_bytes()
-            self.send_response(200);self.headers_common()
-            self.send_header("Content-Type",mimetypes.guess_type(file.name)[0] or "application/octet-stream")
+            self.send_response(200);self.headers_common(immutable=relative.startswith('runtime/pyodide/') or (relative.startswith('runtime/engine-') and relative.endswith('.zip')))
+            content_type={'.mjs':'text/javascript','.js':'text/javascript','.wasm':'application/wasm'}.get(file.suffix)
+            self.send_header("Content-Type",content_type or mimetypes.guess_type(file.name)[0] or "application/octet-stream")
             self.send_header("Content-Length",str(len(body)));self.end_headers();self.wfile.write(body)
         except (FileNotFoundError,ValueError):
             self.json(404,{"error":"Local record not found"})
@@ -119,6 +123,17 @@ class Handler(BaseHTTPRequestHandler):
             if not isinstance(scenario,dict) or not isinstance(scenario.get("name"),str) or not scenario["name"].strip():
                 raise ValueError("请填写情景名称。")
             path=urlsplit(self.path).path
+            if path=='/api/results':
+                # Persist a browser-computed report; never execute submitted code.
+                result=scenario.get('result');inputs=scenario.get('scenario')
+                if not isinstance(result,dict) or not isinstance(inputs,dict) or not isinstance(result.get('profiles'),list) or not isinstance(result.get('provenance'),dict):
+                    raise ValueError('浏览器结果格式无效。')
+                result.pop('paths',None);result.pop('path_metrics',None)
+                result['provenance']['compute_location']='browser'
+                if inputs.get('native_baseline_id'):
+                    result['native_baseline']=reference_view(inputs,self.server.store.get('baselines',inputs['native_baseline_id']))
+                key=self.server.store.put('results',{'name':scenario['name'],'scenario':inputs,'result':result})
+                self.json(201,{'id':key,'native_baseline':result.get('native_baseline')});return
             if path=="/api/scenarios":
                 key=self.server.store.put("scenarios",scenario)
                 self.json(201,{"id":key});return

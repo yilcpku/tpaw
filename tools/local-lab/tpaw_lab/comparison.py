@@ -28,9 +28,8 @@ def channel_history(history,enabled:frozenset):
 
 
 def outcome_vector(result):
-    initial=[sum(r["lifestyle_real"] for r in p["records"][p["retirement_month"]:p["retirement_month"]+12]) for p in result["paths"]]
     d=result["distributions"]
-    return {"initial_period_spending_median":quantile(initial,.5),
+    return {"initial_period_spending_median":d["initial_spending_q5_q50_q95"][1],
             "death_before100_estate_median":d["estate_at_death_before100_q5_q50_q95"][1],
             "late_max_budget_cut_fraction_median":d["late_max_budget_cut_fraction_q5_q50_q95"][1],
             "late_longest_cut_months_median":d["late_longest_short_spell_months_q5_q50_q95"][1],
@@ -47,7 +46,7 @@ def compare_channels(s,history,table):
     cases={};signatures=set()
     for mask in range(8):
         enabled=frozenset(c for i,c in enumerate(CHANNELS) if mask & (1<<i))
-        case=simulate({**s,"use_forward_targets":False},channel_history(history,enabled),table)
+        case=simulate({**s,"use_forward_targets":False},channel_history(history,enabled),table,retain_paths=False)
         signatures.add(case["provenance"]["sample_index_sha256"])
         cases[mask]={"enabled":sorted(enabled),"metrics":outcome_vector(case),
                      "initial_spending_months_min_max":case['distributions']['initial_spending_months_min_max']}
