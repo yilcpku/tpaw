@@ -13,6 +13,10 @@ crate-type = ["lib"]
 name = "simulator"
 path = "src/main.rs"
 
+[[bin]]
+name = "tpaw-replay"
+path = "src/replay.rs"
+
 [dependencies]
 sentry = "0.34.0"
 rand = "0.8.5"
@@ -66,3 +70,11 @@ harness = false
 opt-level = 3
 # For sentry. (maybe need more? https://github.com/getsentry/sentry-docs/issues/9625)
 debug = true 
+
+[[bin]]
+name = "tpaw-horizon"
+path = "src/horizon.rs"
+
+[[bin]]
+name = "tpaw-conditional"
+path = "src/conditional.rs"

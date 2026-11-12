@@ -59,7 +59,7 @@ namespace MonthMajor {
 
 __device__ __host__ __forceinline__ uint32_t
 get_run_by_mfn_index(uint32_t num_runs,
-                     __attribute__((unused)) uint32_t num_months,
+                     [[maybe_unused]] uint32_t num_months,
                      uint32_t run_index,
                      uint32_t month_index) {
   return MonthMajor::get_run_by_mfn_index(num_runs, run_index, month_index);
@@ -97,7 +97,7 @@ convert_to_run_major(const thrust::device_vector<T> &value_by_run_by_mfn,
 // #define RUN_MAJOR
 #ifdef RUN_MAJOR
 __device__ __host__ __forceinline__ uint32_t
-get_run_by_mfn_index(__attribute__((unused)) uint32_t num_runs,
+get_run_by_mfn_index([[maybe_unused]] uint32_t num_runs,
                      uint32_t num_months,
                      uint32_t run_index,
                      uint32_t month_index) {
@@ -106,9 +106,9 @@ get_run_by_mfn_index(__attribute__((unused)) uint32_t num_runs,
 }
 
 __device__ __host__ __forceinline__ uint32_t
-get_run_by_mfn_index_from_run_major_index(__attribute__((unused))
+get_run_by_mfn_index_from_run_major_index([[maybe_unused]]
                                           uint32_t num_runs,
-                                          __attribute__((unused))
+                                          [[maybe_unused]]
                                           uint32_t num_months,
                                           uint32_t index) {
   return index;

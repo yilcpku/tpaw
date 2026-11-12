@@ -14,6 +14,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
+#include "research_conditional.h"
 
 namespace tpaw {
   struct _ExpectedRunData {
@@ -130,14 +131,14 @@ namespace tpaw {
                   .discretionary = FLOAT_L(1.0),
                   .legacy = FLOAT_L(1.0),
               }
-            : ({
+            : ([&] {
       const FLOAT percentage_increase_in_wealth_over_scheduled =
           expected_run_data_if_normal_run->wealth_starting == FLOAT_L(0.0)
               ? FLOAT_L(0.0)
               : static_cast<FLOAT>(
                     wealth / expected_run_data_if_normal_run->wealth_starting) -
                     FLOAT_L(1.0);
-      _ExpensesScale {
+      return _ExpensesScale {
           .discretionary = FLOAT_MAX(
               FLOAT_MA(percentage_increase_in_wealth_over_scheduled,
                        expected_run_data_if_normal_run
@@ -151,7 +152,7 @@ namespace tpaw {
                                  FLOAT_L(1.0)),
                         FLOAT_L(0.0)),
       };
-    });
+    })();
 
       AccountForWithdrawal account(wealth);
       account.withdraw(npv_approx_essential_expenses_without_current_month +
@@ -337,7 +338,7 @@ namespace tpaw {
               ? __FLOAT_DIVIDE(legacy_stock_allocation + stock_allocation +
                                    stock_allocation,
                                FLOAT_L(3.0))
-              : ({
+              : ([&] {
                   const CURRENCY legacy_in_stocks =
                       (npv_approx_at_start_spending_scaled_and_constrained_to_wealth
                            .legacy *
@@ -352,8 +353,8 @@ namespace tpaw {
                           .general,
                       static_cast<CURRENCY>(stock_allocation),
                       discretionary_and_legacy_in_stocks);
-                  static_cast<FLOAT>(all_in_stocks / wealth_at_start);
-                });
+                  return static_cast<FLOAT>(all_in_stocks / wealth_at_start);
+                })();
 
       const FLOAT elasticity_of_extra_withdrawal_goals_wrt_stocks =
           stock_allocation;
@@ -799,8 +800,7 @@ namespace tpaw {
       const FLOAT withdrawals_from_savings_portfolio_rate =
           (!isfinite(savings_portfolio_after_contributions_and_withdrawals
                          .withdrawals.from_savings_portfolio_rate_or_nan_or_inf)
-               ? ({
-                   fn<false, is_expected_run>(
+               ? fn<false, is_expected_run>(
                        run_index,
                        month_index,
                        0.000001,
@@ -814,8 +814,7 @@ namespace tpaw {
                        cuda_processed_run_x_mfn_simulated_x_mfn,
                        expected_run_result_by_mfn,
                        run_result_padded)
-                       .withdrawals_from_savings_portfolio_rate;
-                 })
+                       .withdrawals_from_savings_portfolio_rate
                : savings_portfolio_after_contributions_and_withdrawals
                      .withdrawals.from_savings_portfolio_rate_or_nan_or_inf);
 
@@ -1133,6 +1132,180 @@ namespace tpaw {
     do_run.operator()<false>();
 
     return run_result_padded_host_struct;
+  }
+
+  struct _ConditionalCase {
+    uint32_t start;
+    const CURRENCY *income,*essential,*discretionary;
+    const Cuda_Processed_TPAW_Run_x_MFNSimulated_x_MFN::Entry *processed;
+    _ExpectedRunData *expected;
+  };
+
+  __device__ CURRENCY _conditional_probe(CURRENCY balance,uint32_t m,const _ConditionalCase& c,
+      uint32_t index,OptCURRENCY ceiling,OptCURRENCY floor) {
+    const auto& e=c.processed[index];
+    const auto pre=_get_precomputation_at_start::fn<false>(balance,
+      e.npv_approx.income_without_current_month,e.npv_approx.essential_expenses_without_current_month,
+      e.npv_approx.discretionary_expenses_without_current_month,e.npv_approx.legacy_exact,
+      c.income[m],c.essential[m],c.discretionary[m],&c.expected[m]);
+    const auto target=_get_target_withdrawals_assuming_no_ceiling_or_floor::fn(true,
+      c.essential[m],c.discretionary[m],e.cumulative_1_plus_g_over_1_plus_r,
+      pre.expenses_scale.discretionary,pre.npv_approx_spending_scaled_and_constrained_to_wealth.general);
+    const auto constrained=run_common::apply_withdrawal_ceiling_and_floor(target,c.discretionary[m],ceiling,floor,true,false);
+    return run_common::apply_contributions_and_withdrawals(balance,c.income[m],constrained,false).withdrawals.general;
+  }
+
+  __global__ void _conditional_kernel(uint32_t runs,uint32_t months,CURRENCY initial,
+      const _ConditionalCase* cases,OptCURRENCY ceiling,OptCURRENCY floor,CURRENCY threshold,
+      uint32_t notice_months,StocksAndBondsFLOAT expected,
+      const StocksAndBondsFLOAT* returns,RunResultPadded_GPU* out,
+      uint32_t* retirement,CURRENCY* probes,uint32_t* forced) {
+    const uint32_t r=blockIdx.x*blockDim.x+threadIdx.x;if(r>=runs)return;
+    CURRENCY balance=initial;uint32_t active=0;bool committed=false;
+    for(uint32_t m=0;m<months;++m){
+      const uint32_t index=get_run_by_mfn_index(runs,months,r,m);
+      if(!committed && m==cases[active].start-notice_months){
+        const auto& candidate=cases[active];
+        CURRENCY projected=balance;
+        // Notice is irrevocably selected before the current month's cashflow or
+        // return. Project known net contributions using constant expected returns,
+        // never the future realized array. The normal loop pays them only once.
+        for(uint32_t future=m;future<candidate.start;++future){
+          auto future_index=get_run_by_mfn_index(runs,months,r,future);
+          projected=_single_month::fn<false,false>(r,future,projected,candidate.start,
+            ceiling,floor,candidate.income[future],candidate.essential[future],
+            candidate.discretionary[future],expected,candidate.processed[future_index],
+            candidate.expected,nullptr).balance_ending;
+        }
+        const auto exit_index=get_run_by_mfn_index(runs,months,r,candidate.start);
+        const CURRENCY spending=_conditional_probe(projected,candidate.start,candidate,exit_index,ceiling,floor);
+        probes[r*3+active]=spending;
+        if(spending>=threshold || active==2){
+          committed=true;retirement[r]=candidate.start;forced[r]=spending<threshold;
+        }else{++active;}
+      }
+      const auto& c=cases[active];
+      balance=_single_month::fn<true,false>(r,m,balance,c.start,ceiling,floor,
+        c.income[m],c.essential[m],c.discretionary[m],returns[index],c.processed[index],c.expected,out).balance_ending;
+    }
+  }
+
+  ConditionalResult run_conditional(uint32_t runs,uint32_t months,CURRENCY balance,
+      const std::array<uint32_t,3>& starts,OptCURRENCY ceiling,OptCURRENCY floor,
+      StocksAndBondsFLOAT expected,CURRENCY threshold,
+      const std::array<thrust::device_vector<CURRENCY>,3>& income,
+      const std::array<thrust::device_vector<CURRENCY>,3>& essential,
+      const std::array<thrust::device_vector<CURRENCY>,3>& discretionary,
+      const thrust::device_vector<StocksAndBondsFLOAT>& realized,
+      const std::array<Cuda_Processed_TPAW_Run_x_MFNSimulated_x_MFN,3>& processed,
+      uint32_t notice_months) {
+    if(starts[1]!=starts[0]+12 || starts[2]!=starts[0]+24 || starts[2]>=months || threshold<0 || notice_months>starts[0])
+      throw std::runtime_error("conditional dates/threshold");
+    std::array<thrust::device_vector<_ExpectedRunData>,3> refs;
+    std::vector<_ConditionalCase> host;
+    auto scratch=RunResultPadded::make(1,months);auto scratch_gpu=scratch.copy_to_gpu();
+    for(uint32_t i=0;i<3;++i){
+      refs[i].resize(months);
+      _kernel<true><<<1,64>>>(1,months,balance,starts[i],ceiling,floor,expected,
+        income[i].data().get(),essential[i].data().get(),discretionary[i].data().get(),realized.data().get(),
+        processed[i].for_expected_run.data().get(),refs[i].data().get(),scratch_gpu.get());
+      gpuErrchk(cudaPeekAtLastError());gpuErrchk(cudaDeviceSynchronize());
+      host.push_back({starts[i],income[i].data().get(),essential[i].data().get(),discretionary[i].data().get(),
+        processed[i].for_normal_run.data().get(),refs[i].data().get()});
+    }
+    thrust::device_vector<_ConditionalCase> cases(host);
+    auto result=RunResultPadded::make(runs,months);auto result_gpu=result.copy_to_gpu();
+    thrust::device_vector<uint32_t> retirement(runs,0),forced(runs,0);
+    thrust::device_vector<CURRENCY> probes(runs*3,-1.0);
+    _conditional_kernel<<<(runs+63)/64,64>>>(runs,months,balance,cases.data().get(),ceiling,floor,threshold,notice_months,expected,
+      realized.data().get(),result_gpu.get(),retirement.data().get(),probes.data().get(),forced.data().get());
+    gpuErrchk(cudaPeekAtLastError());gpuErrchk(cudaDeviceSynchronize());
+    return {std::move(result),device_vector_to_host(retirement),device_vector_to_host(probes),device_vector_to_host(forced)};
+  }
+
+  TEST_CASE("research_conditional::continuity_cap_and_no_lookahead") {
+    const uint32_t months=36,runs=1;
+    const std::array<uint32_t,3> starts{0,12,24};
+    const std::vector<CURRENCY> zero(months,0.0);
+    const std::vector<FLOAT> risk(months,INFINITY);
+    const thrust::device_vector<MonthlyAndAnnual<StocksAndBondsFLOAT>> expected(months,
+      MonthlyAndAnnual<StocksAndBondsFLOAT>{{0,0},{0,0}});
+    std::array<thrust::device_vector<CURRENCY>,3> income,essential,discretionary;
+    std::array<Cuda_Processed_TPAW_Run_x_MFNSimulated_x_MFN,3> processed;
+    for(uint32_t i=0;i<3;++i){
+      auto inc=zero;for(uint32_t m=0;m<starts[i];++m)inc[m]=100;
+      income[i]=inc;essential[i]=zero;discretionary[i]=zero;
+      processed[i]=cuda_process_tpaw_run_x_mfn_simulated_x_mfn(runs,months,months,inc,zero,zero,risk,
+        .04f,0,0,INFINITY,0,expected,expected);
+    }
+    const thrust::device_vector<StocksAndBondsFLOAT> realized(months,StocksAndBondsFLOAT{0,0});
+    const auto execute=[&](CURRENCY threshold,const thrust::device_vector<StocksAndBondsFLOAT>& ret){
+      return run_conditional(runs,months,1200,starts,OptCURRENCY{0,0},OptCURRENCY{0,0},
+        StocksAndBondsFLOAT{0,0},threshold,income,essential,discretionary,ret,processed);};
+    auto now=execute(0,realized);CHECK(now.retirement_month[0]==0);
+    CHECK(now.paths.get_single(0,0).withdrawals_general==doctest::Approx(1200.0/36));
+    auto later=execute(50,realized);CHECK(later.retirement_month[0]==12);
+    CHECK(later.paths.get_single(0,12).balance_start==doctest::Approx(2400));
+    CHECK(later.paths.get_single(0,12).withdrawals_general==doctest::Approx(100));
+    CHECK(later.paths.get_single(0,11).withdrawals_general==0);
+    auto capped=execute(10000,realized);CHECK(capped.retirement_month[0]==24);
+    CHECK(capped.forced_below_threshold[0]==1);
+    CHECK(capped.paths.get_single(0,24).balance_start==doctest::Approx(3600));
+    CHECK(capped.reviewed_spending[2]==doctest::Approx(300));
+    auto shock=std::vector<StocksAndBondsFLOAT>(months,StocksAndBondsFLOAT{0,0});shock[20].bonds=-.5f;
+    auto changed=execute(50,thrust::device_vector<StocksAndBondsFLOAT>(shock));
+    CHECK(changed.retirement_month==later.retirement_month);
+    CHECK(changed.reviewed_spending==later.reviewed_spending);
+    CHECK(changed.paths.get_single(0,20).withdrawals_general==later.paths.get_single(0,20).withdrawals_general);
+    CHECK(changed.paths.get_single(0,21).balance_start==doctest::Approx(later.paths.get_single(0,21).balance_start*.5));
+  }
+
+  TEST_CASE("research_conditional::irrevocable_notice_known_contributions_no_future_returns") {
+    const uint32_t months=36,runs=1;
+    const std::array<uint32_t,3> starts{3,15,27};
+    const std::vector<CURRENCY> zero(months,0);
+    const std::vector<FLOAT> risk(months,INFINITY);
+    thrust::device_vector<MonthlyAndAnnual<StocksAndBondsFLOAT>> expected(months,
+      MonthlyAndAnnual<StocksAndBondsFLOAT>{{0,0},{0,0}});
+    std::array<thrust::device_vector<CURRENCY>,3> income,essential,discretionary;
+    std::array<Cuda_Processed_TPAW_Run_x_MFNSimulated_x_MFN,3> processed;
+    for(uint32_t i=0;i<3;++i){
+      auto inc=zero;for(uint32_t m=0;m<starts[i];++m)inc[m]=100;
+      income[i]=inc;essential[i]=zero;discretionary[i]=zero;
+      processed[i]=cuda_process_tpaw_run_x_mfn_simulated_x_mfn(runs,months,months,inc,zero,zero,risk,
+        .04f,0,0,INFINITY,0,expected,expected);
+    }
+    const thrust::device_vector<StocksAndBondsFLOAT> realized(months,StocksAndBondsFLOAT{0,0});
+    const auto execute=[&](CURRENCY threshold,uint32_t notice,const thrust::device_vector<StocksAndBondsFLOAT>& ret){
+      return run_conditional(runs,months,1200,starts,OptCURRENCY{0,0},OptCURRENCY{0,0},
+        StocksAndBondsFLOAT{0,0},threshold,income,essential,discretionary,ret,processed,notice);};
+    auto now=execute(40,3,realized);
+    CHECK(now.retirement_month[0]==3);
+    CHECK(now.reviewed_spending[0]==doctest::Approx(1500.0/33));
+    CHECK(now.paths.get_single(0,3).balance_start==doctest::Approx(1500));
+    CHECK(now.paths.get_single(0,2).withdrawals_general==0);
+    CHECK(now.paths.get_single(0,3).withdrawals_general==doctest::Approx(1500.0/33));
+    CHECK(now.reviewed_spending[1]==-1);
+    auto immediate=execute(0,0,realized);auto committed=execute(0,3,realized);
+    for(uint32_t m=0;m<months;++m){
+      CHECK(immediate.paths.get_single(0,m).balance_start==committed.paths.get_single(0,m).balance_start);
+      CHECK(immediate.paths.get_single(0,m).withdrawals_general==committed.paths.get_single(0,m).withdrawals_general);
+    }
+    auto shock=std::vector<StocksAndBondsFLOAT>(months,StocksAndBondsFLOAT{0,0});shock[1].bonds=-.5f;
+    auto changed=execute(40,3,thrust::device_vector<StocksAndBondsFLOAT>(shock));
+    CHECK(changed.retirement_month==now.retirement_month);
+    CHECK(changed.reviewed_spending==now.reviewed_spending);
+    CHECK(changed.paths.get_single(0,3).balance_start==doctest::Approx(800));
+    CHECK(changed.paths.get_single(0,3).withdrawals_general<40);
+    CHECK(changed.forced_below_threshold[0]==0); // Passed at commitment, failed at exit.
+    auto later=execute(50,3,realized);
+    CHECK(later.retirement_month[0]==15);
+    CHECK(later.paths.get_single(0,15).balance_start==doctest::Approx(2700));
+    CHECK(later.reviewed_spending[1]==doctest::Approx(2700.0/21));
+    auto capped=execute(10000,3,realized);
+    CHECK(capped.retirement_month[0]==27);
+    CHECK(capped.forced_below_threshold[0]==1);
+    CHECK(capped.paths.get_single(0,27).balance_start==doctest::Approx(3900));
   }
 
   TEST_CASE("run_tpaw") {

@@ -1,6 +1,8 @@
 #include "./annualize_series.h"
 #include "extern/doctest.h"
 #include "src/utils/cuda_utils.h"
+#include <thrust/iterator/zip_iterator.h>
+#include <thrust/tuple.h>
 
 
 thrust::device_vector<FLOAT>

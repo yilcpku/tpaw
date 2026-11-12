@@ -298,8 +298,7 @@ namespace spaw {
       const FLOAT withdrawals_from_savings_portfolio_rate =
           (!isfinite(savings_portfolio_after_contributions_and_withdrawals
                          .withdrawals.from_savings_portfolio_rate_or_nan_or_inf)
-               ? ({
-                   fn<false, is_expected_run>(
+               ? fn<false, is_expected_run>(
                        run_index,
                        month_index,
                        0.000001,
@@ -314,8 +313,7 @@ namespace spaw {
                        cuda_processed_run_x_mfn_simulated_x_mfn,
                        expected_run_result_by_mfn,
                        run_result_padded)
-                       .withdrawals_from_savings_portfolio_rate;
-                 })
+                       .withdrawals_from_savings_portfolio_rate
                : savings_portfolio_after_contributions_and_withdrawals
                      .withdrawals.from_savings_portfolio_rate_or_nan_or_inf);
 

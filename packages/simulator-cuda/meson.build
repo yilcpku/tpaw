@@ -32,6 +32,8 @@ sources = [
   'src/utils/run_mfn_indexing.cu',
   'src/get_annualized_stats.cu',
   'src/simulator_cuda.cu',
+  'src/research_horizon.cu',
+  'src/research_conditional.cu',
   ]
 if test_mode
   main_source = 'src/main_test.cu'
@@ -76,4 +78,3 @@ else
   # Full path to bindgen because meson in Dockerfile was not finding it otherwise, even though it's in the PATH.
   meson.add_install_script('/root/.cargo/bin/bindgen', '--raw-line', '#![allow(non_upper_case_globals)]', '--raw-line', '#![allow(non_camel_case_types)]', '--raw-line', '#![allow(non_snake_case)]', '/usr/local/include/simulator-cuda/simulator_cuda.h', '-o', '../../simulator-rust/src/lib/cuda_bridge.rs')
 endif
- 

@@ -58,6 +58,7 @@ cuda_process_tpaw_run_x_mfn_simulated_x_mfn(
     const thrust::device_vector<MonthlyAndAnnual<StocksAndBondsFLOAT>>
         &expected_returns_by_mfn_simulated_for_expected_run,
     const thrust::device_vector<MonthlyAndAnnual<StocksAndBondsFLOAT>>
-        &expected_returns_by_run_by_mfn_simulated);
+        &expected_returns_by_run_by_mfn_simulated,
+    const std::vector<uint32_t> &planning_end_by_mfn_simulated = {});
 
 #endif // CUDA_PROCESS_TPAW_RUN_X_MFN_SIMULATED_X_MFN_H

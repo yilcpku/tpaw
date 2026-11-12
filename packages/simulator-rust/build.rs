@@ -3,8 +3,18 @@ use std::{
     io::{Read, Result},
 };
 fn main() -> Result<()> {
-    println!("cargo:rustc-link-search=native=/usr/local/cuda/lib64");
-    println!("cargo:rustc-link-search=native=/usr/local/lib");
+    println!("cargo:rerun-if-env-changed=TPAW_CUDA_LIB_DIR");
+    println!("cargo:rerun-if-env-changed=CUDA_PATH");
+    if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("windows") {
+        let cuda = std::env::var("CUDA_PATH").expect("CUDA_PATH is required for a Windows build");
+        let simulator = std::env::var("TPAW_CUDA_LIB_DIR")
+            .expect("TPAW_CUDA_LIB_DIR is required for a Windows build");
+        println!("cargo:rustc-link-search=native={}/lib/x64", cuda);
+        println!("cargo:rustc-link-search=native={}", simulator);
+    } else {
+        println!("cargo:rustc-link-search=native=/usr/local/cuda/lib64");
+        println!("cargo:rustc-link-search=native=/usr/local/lib");
+    }
     println!("cargo:rustc-link-lib=dylib=cudart");
     println!("cargo:rustc-link-lib=dylib=cublas");
     println!("cargo:rustc-link-lib=dylib=simulator-cuda");

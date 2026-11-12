@@ -1,2 +1,10 @@
 node_modules
 .DS_Store
+__pycache__/
+*.pyc
+.npm-cache/
+packages/local-lab/dist/
+packages/simulator-rust/target/
+# Personal inputs, cached licensed data, scenarios and simulation output
+.private/
+*.local.json
