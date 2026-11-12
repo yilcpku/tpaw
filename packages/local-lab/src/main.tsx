@@ -14,6 +14,8 @@ import Cashflows,{type CashflowRow} from './Cashflows'
 import NativeReference,{type NativeBaseline} from './NativeReference'
 import NativeControl from './NativeControl'
 import Diagnostics,{type DiagnosticsData} from './Diagnostics'
+import HostedAccess from './HostedAccess'
+import {api,hosted} from './api'
 
 type Scenario = {name: string; initial_assets: number; reserve: number; annual_budget: number;
   current_age: number; candidates: string; threshold_annual: number; notice_months: number;
@@ -27,7 +29,7 @@ type Scenario = {name: string; initial_assets: number; reserve: number; annual_b
   cashflow_rows:CashflowRow[];planning_cpi:number;reserve_funding:string;reserve_basis:string;reserve_cash_rate:number;
   savings_mode:string;savings_coverage_end?:string;require_savings_coverage:boolean;source_note?:string;
   policy_variance_annual?:number;policy_rra?:number[];risk_delta_at90:number;additional_spending_tilt?:number}
-type Status = {engine: string; features: {name: string; state: string}[]; datasets: {id: string; name: string}[];diagnostics_id?:string;native_control_available?:boolean}
+type Status = {engine: string; features: {name: string; state: string}[]; datasets: {id: string; name: string}[];diagnostics_id?:string;native_control_available?:boolean;max_runs?:number}
 type Saved = {id: string; name: string}
 type Results = {label: string; notes: string[]; profiles?: Profile[];
   summary?: {name: string; value: string}[];
@@ -123,14 +125,6 @@ function RiskDetails({results}: {results:Results}) {
   </>
 }
 
-async function api<T>(path: string, body?: unknown): Promise<T> {
-  const r = await fetch('/api/' + path, body === undefined ? {} : {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)})
-  const data = await r.json()
-  if (!r.ok) throw new Error(data.error || '本地请求失败')
-  return data
-}
-
-
 function App() {
   const [s,setS] = useState<Scenario>(example)
   const [status,setStatus] = useState<Status>()
@@ -154,10 +148,11 @@ function App() {
   const select = (key: keyof Scenario, label: string, options: {value: string; label: string}[], description?: string) => <Selector label={label} description={description} value={String(s[key])} options={options} onChange={v=>update(key,v as never)} width="100%"/>
   async function run() {setRunning(true);setMessage('');try {setResults(await api<Results>('run',s));setTab('results')}catch(e){setMessage(e instanceof Error?e.message:String(e))}finally{setRunning(false)}}
   return <Theme theme={neutralTheme} mode="light"><div className="app">
-    <header><div><span className="eyebrow">TPAW / LOCAL RESEARCH</span><h1>把退休计划放回生活里</h1><p>比较消费路径、晚年削减与剩余资产。情景和结果只保存在本机。</p></div><span className="local">本地运行</span></header>
+    <header><div><span className="eyebrow">TPAW / PRIVATE RESEARCH</span><h1>把退休计划放回生活里</h1><p>比较消费路径、晚年削减与剩余资产。{hosted?'情景和结果保存在你的服务器，登录后可访问。':'情景和结果只保存在本机。'}</p></div><span className="local">{hosted?'私有服务器':'本地运行'}</span></header>
+    {hosted&&<p className="small">服务器单次最多 {status?.max_runs||200} 条路径；更大批量和 CUDA 原生重跑可使用本机版本。已迁移的原生快照仍可查看。</p>}
     <nav aria-label="规划视图">{[{value:'plan',label:'情景与参数'},{value:'results',label:'路径与比较'},{value:'native',label:'原版基准'},{value:'sources',label:'数据与方法'}].map(t=><Button key={t.value} variant={tab===t.value?'secondary':'ghost'} label={t.label} onClick={()=>setTab(t.value)}/>)}</nav>
-    <div className="toolbar"><div className="scenario-name"><TextInput label="当前情景" value={s.name} onChange={v=>update('name',v)}/></div><div className="saved"><Selector label="本地保存的情景" value={chosen} options={saved.map(x=>({value:x.id,label:x.name}))} placeholder="选择已保存的情景" onChange={id=>{setChosen(id);api<Scenario>('scenarios/'+id).then(data=>setS({...example,...data})).then(()=>setResults(undefined)).catch(e=>setMessage(e.message))}} width="100%"/></div>
-    <Button label="保存情景" onClick={()=>{api<{id:string}>('scenarios',s).then(async x=>{setChosen(x.id);await refresh();setMessage('情景已保存到本地。')}).catch(e=>setMessage(e.message))}}/>
+    <div className="toolbar"><div className="scenario-name"><TextInput label="当前情景" value={s.name} onChange={v=>update('name',v)}/></div><div className="saved"><Selector label={hosted?'服务器保存的情景':'本地保存的情景'} value={chosen} options={saved.map(x=>({value:x.id,label:x.name}))} placeholder="选择已保存的情景" onChange={id=>{setChosen(id);api<Scenario>('scenarios/'+id).then(data=>setS({...example,...data})).then(()=>setResults(undefined)).catch(e=>setMessage(e.message))}} width="100%"/></div>
+    <Button label="保存情景" onClick={()=>{api<{id:string}>('scenarios',s).then(async x=>{setChosen(x.id);await refresh();setMessage(hosted?'情景已保存到服务器。':'情景已保存到本地。')}).catch(e=>setMessage(e.message))}}/>
     <Button label="运行模拟" variant="primary" isLoading={running} onClick={run}/></div>
     {message&&<p role="status" className="notice">{message}</p>}
     {tab==='plan'&&<main className="planning"><div className="inputs"><section><h2>资产与生活目标</h2><p className="small">首次打开使用示例金额；不会自动将归档金额当成最新资产。</p>{s.source_note&&<p className="notice">{s.source_note}</p>}<div className="fields">{number('initial_assets','初始总资产 / 人民币')}{number('reserve','独立准备金目标 / 人民币','从已有资产划出，不是新增财富。')}{select('reserve_funding','准备金划分时点',[{value:'initial',label:'评估时即划出'},{value:'retirement',label:'实际退休月从核心划出'}])}{select('reserve_basis','准备金目标金额口径',[{value:'real',label:'评估月实际购买力'},{value:'nominal',label:'划分时固定名义金额'}])}{number('reserve_cash_rate','准备金现金部分名义年收益 / %','独立于核心现金底线；固定情景假设，不是MMF产品报价。',100)}{number('annual_budget','年度目标消费 / 实际人民币')}{number('current_age','当前年龄 / 岁')}</div></section>
@@ -169,8 +164,8 @@ function App() {
     {tab==='results'&&<main><section><h2>消费与晚年风险</h2>{results?<><h3>{results.label}</h3>{results.profiles&&results.profiles.length>0&&<Chart rows={results.profiles}/>}<dl className="metrics">{results.summary?.map(x=><div key={x.name}><dt>{x.name}</dt><dd>{x.value}</dd></div>)}</dl>{results.notes.map(note=><p key={note} className="small">{note}</p>)}<RiskDetails results={results}/><Comparison results={results}/><ChannelComparison results={results}/><Provenance results={results}/>{results.native_baseline&&<NativeReference baseline={results.native_baseline}/>}</>:<p>设置并运行情景后，这里会展示消费路径、支出削减和资产结果。</p>}</section></main>}
     {tab==='native'&&<main><NativeControl available={!!status?.native_control_available} candidates={s.candidates} scenario={s} runApi={body=>api('run-native',body)}/><section><h2>保留的原版基准</h2><p>归档结果与请求保持原样。选择历史导入情景后，可以在运行结果中查看预期改动与后续额外编辑；参数变化不会被误说成原版已跟随重跑。</p><Selector label="原生基准快照" value={nativeId} options={baselines.map(b=>({value:b.id,label:b.name}))} onChange={id=>{setNativeId(id);api<NativeBaseline>('baselines/'+id).then(setNative).catch(e=>setMessage(e.message))}} placeholder="选择原版快照" width="100%"/>{baselines.length===0&&<p>尚未导入原生基准。可使用本地归档导入命令建立私有快照。</p>}</section>{native&&<NativeReference baseline={native}/>}</main>}
     {tab==='sources'&&<main><section><h2>数据与实现状态</h2><p>行情采集与模拟分离；运行已保存情景不会自动访问互联网。</p><ul className="status-list">{status?.features.map(f=><li key={f.name}><span>{f.name}</span><strong>{f.state}</strong></li>)}</ul><DataAudit audit={audit}/><Diagnostics data={diagnostics}/><h3>收益口径</h3><p>人民币实际总收益 = 美元股票总收益 × 人民币/美元汇率变化 ÷ 中国 CPI 变化。基金 NAV 总收益已包含的分红再投资和费用不再重复调整。</p><h3>估值与前瞻收益</h3><p>原版的回归、保守估计及1/CAPE预设已包含估值信息；本地前瞻目标为绝对替换值，不再追加一次估值扣减。美国CAPE也不能直接充当全球股票的估值。</p><p className="small">Vanguard在2026年10月21日发布的9月底模型中，给出美股未来10年美元名义复合年化4.8%–6.8%，发达市场非美股5.3%–7.3%。这些预测支持测试较低收益情景，不能直接作为人民币实际滚动12月算术均值。应分别设置汇率、中国通胀和收益口径，并比较目标敏感性。<a href="https://corporate.vanguard.com/content/corporatesite/us/en/corp/vemo/vemo-return-forecasts.html" target="_blank" rel="noreferrer">官方模型说明及日期</a></p><h3>历史代理</h3><p>Fama/French 发达市场组合可延伸到 1990 年，包含股息与资本利得；它与覆盖新兴市场的 FTSE All-World 存在口径差异。2012年6月起可接官方VWRL总收益。下方分别展示月度ETF差异和FTSE官方年度窗口；代理段与基金段的费用口径变化会保留标注。</p><p><a href="https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/Data_Library/f-f_5developed.html" target="_blank" rel="noreferrer">French 原始说明</a> · <a href="https://github.com/meta/astryx" target="_blank" rel="noreferrer">Meta Astryx</a></p></section></main>}
-    <footer>TPAW 本地研究扩展 · Astryx 0.7.14 · 保留原版引擎与归档基准</footer>
+    <footer>TPAW 研究扩展 · Astryx 0.7.14 · 保留原版引擎与归档基准<br/>Required Notice: Copyright (c) 2020–2026 Benjamin Mathew and Jacob Mathew. <a href="https://polyformproject.org/licenses/noncommercial/1.0.0" target="_blank" rel="noreferrer">PolyForm Noncommercial 1.0.0</a></footer>
   </div></Theme>
 }
 
-createRoot(document.getElementById('root')!).render(<App/> )
+createRoot(document.getElementById('root')!).render(<HostedAccess><App/></HostedAccess>)

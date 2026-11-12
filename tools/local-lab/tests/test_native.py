@@ -1,5 +1,6 @@
 import ctypes
 import hashlib
+import os
 from pathlib import Path
 import unittest
 from unittest.mock import patch
@@ -7,6 +8,7 @@ from tpaw_lab.native import verify_abi,Params,Arrays,Advanced,export_paths
 
 
 class NativeLayoutTests(unittest.TestCase):
+    @unittest.skipUnless(os.name=='nt','Pinned DLL is Windows-only')
     def test_archived_export_refuses_dangling_output_link_before_financial_decoding(self):
         payload=b'unit-test-dll-hash-only'
         with patch.object(Path,'read_bytes',return_value=payload),patch.object(Path,'is_symlink',return_value=True):
